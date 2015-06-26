@@ -23,9 +23,9 @@ A.P. Carrieri, F. Utro, L. Parida. Accurate and efficient sampling of underlying
 
 #Executable
 
-For convenience, we also provide a precompiled version of SimRA usable via command line that you can download from the bin folder. 
+For convenience, we also provide a precompiled version of SimRA usable via command line that you can download from the binary folder. 
 
-Here we provide a short description on how to use it. For a more completed information please refer to the SimRA_UserManual.pdf file located in the bin folder.
+Here we provide a short description on how to use it. For a more completed information please refer to the SimRA_UserManual.pdf file located in the binary folder.
 
 ##How to run?
 
