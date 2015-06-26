@@ -15,6 +15,11 @@ git clone git://github.com/ComputationalGenomics/SimRA
 
 or you may want directly import the project on Eclipse (please see this wiki: https://github.com/OneBusAway/onebusaway/wiki/Importing-source-code-into-Eclipse) 
 
+#Citation
+
+Please cite the following article if you use SimRA in your research:
+
+A.P. Carrieri, F. Utro, L. Parida. Accurate and ecient sampling of underlying ARG of multiple populations under subdivision and admixture. (submitted 2015)
 
 #Apache License v. 2.0
 Copyright 2015 
