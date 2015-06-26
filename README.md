@@ -16,7 +16,7 @@ git clone git://github.com/ComputationalGenomics/SimRA
 or you may want directly import the project on Eclipse (please see this wiki: https://github.com/OneBusAway/onebusaway/wiki/Importing-source-code-into-Eclipse) 
 
 
-#Apache License v2
+#Apache License v. 2.0
 Copyright 2015 
 
 Licensed under the Apache License, Version 2.0 (the "License");
