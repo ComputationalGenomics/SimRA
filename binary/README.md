@@ -11,7 +11,7 @@ Here we provide a short description on how to use it. For a more completed infor
 $ java -jar SimRa.jar <whole path input directory> <name input file>.txt <whole path output directory> <name output file> [-STR <STRs number> <state> <muSTR>]
 ```
 
-##Requied parameters
+##Required parameters
 
 ```sh
 - <whole path input directory>: whole path of the directory when the input le is stored;
