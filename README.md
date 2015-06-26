@@ -19,7 +19,7 @@ or you may want directly import the project on Eclipse (please see this wiki: ht
 
 Please cite the following article if you use SimRA in your research:
 
-A.P. Carrieri, F. Utro, L. Parida. Accurate and ecient sampling of underlying ARG of multiple populations under subdivision and admixture. (submitted 2015)
+A.P. Carrieri, F. Utro, L. Parida. Accurate and efficient sampling of underlying ARG of multiple populations under subdivision and admixture. (submitted 2015)
 
 #Apache License v. 2.0
 Copyright 2015 
