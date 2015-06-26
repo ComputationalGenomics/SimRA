@@ -6,7 +6,7 @@ SimRA has been developed in java under the Eclipse Framework
 #Pre-requisites
 
 - Java JDK (version 1.6)
-- Apache Commons Math library. The jar file commons-math3-3.5.jar must be downloaded and stored in the directory SimRA lib. You can dowload it from http://commons.apache.org/proper/commons-math/download_math.cgi.
+- Apache Commons Math library. The jar file commons-math3-3.5.jar must be downloaded and stored in the SimRA lib folder. You can dowload it from http://commons.apache.org/proper/commons-math/download_math.cgi.
 - Eclipse (Recommended, not required)
 
 #Get Started
