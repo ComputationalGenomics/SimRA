@@ -70,7 +70,7 @@ java -jar SimRA.jar ~/Desktop/inputSimRA/scaffold 2admix.txt ~/Desktop/outputSim
 The whole path must be specified if the input/output directories inputSimRA, outputSimRA are located in a different directory of the executable SimRA.jar.
 
 #Apache License v. 2.0
-Copyright 2015 
+Copyright 2015 IBM Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
