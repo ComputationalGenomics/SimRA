@@ -1,5 +1,5 @@
 #SimRA Executable
-SimRa is provided as a Java executable via command line.
+SimRa is also provided as a Java executable via command line.
 
 
 #How to run?
