@@ -34,7 +34,7 @@ number;
 #Example
 To execute SimRA.jar it is necessary to reach the directory where the SimRA.jar is located. Some examples of command lines to execute SimRA.jar are the following:
 
-##Without STR polymorphisms generation :
+##Without STR polymorphisms generation:
 ```sh
 java -jar SimRA.jar ./scaffold 2admix.txt ./output scaffold 2admix
 ```
