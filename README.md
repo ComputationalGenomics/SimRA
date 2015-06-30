@@ -30,8 +30,8 @@ Here we provide a short description on how to use it. For a more completed infor
 ##How to run?
 
 ```sh
-$ java -jar SimRA.jar <whole path input directory> <name input file>.txt <whole path output directory>
-<name output file> [-STR <STRs number> <state> <muSTR>]
+$ java -jar SimRA.jar <whole path input directory> <name input file>.txt
+<whole path output directory> <name output file> [-STR <STRs number> <state> <muSTR>]
 ```
 
 ###Required parameters
@@ -66,8 +66,8 @@ This command line allows to save the output files in the same directory where th
 ###With STR polymorphisms generation:
 
 ```sh
-java -jar SimRA.jar ~/Desktop/inputSimRA/scaffold_2admix.txt ~/Desktop/outputSimRA/output scaffold_2admix
--STR 40 10 6.9
+java -jar SimRA.jar ~/Desktop/inputSimRA/scaffold_2admix.txt ~/Desktop/outputSimRA/output
+scaffold_2admix -STR 40 10 6.9
 ```
 The whole path must be specified if the input/output directories inputSimRA, outputSimRA are located in a different directory of the executable SimRA.jar.
 
