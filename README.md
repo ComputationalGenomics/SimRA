@@ -39,7 +39,8 @@ $ java -jar SimRA.jar <whole path input directory> <name input file>.txt
 ```sh
 - <whole path input directory>: whole path of the directory when the input file is stored;
 - <name input file>.txt: name for the input file that has to have a ".txt" extension;
-- <whole path output directory>: whole path of the directory when the output files will be saved. The output directory must be created by the user before executing SimRA;
+- <whole path output directory>: whole path of the directory when the output files will be saved.
+The output directory must be created by the user before executing SimRA;
 - <name output file>: name for the output text files without extension;
 ```
 
