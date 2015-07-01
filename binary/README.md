@@ -23,8 +23,7 @@ $ java -jar SimRa.jar <whole path input directory> <name input file>.txt <whole 
 ##Optional parameters
 
 ```sh
-- STR: it allows to get an output le containing information about STR
-polymorphisms;
+- STR: it allows to get an output le containing information about STR polymorphisms;
 - STRs number: number of STR loci - integer;
 - state: initial state for each STR locus - integer;
 - muSTR: STR mutation rate in mut/locus/gen x 10^􀀀4 - non negative real
