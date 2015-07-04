@@ -88,3 +88,6 @@ limitations under the License.
 
 #Contact
 
+#Open Source @ IBM
+
+Find more open source projects on the [IBM Github Page](http://ibm.github.io/)
