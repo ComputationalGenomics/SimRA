@@ -23,7 +23,7 @@ A.P. Carrieri, F. Utro, L. Parida. Accurate and efficient sampling of underlying
 
 #Executable
 
-For convenience, we also provide a precompiled version of SimRA usable via command line that you can download from the binary folder. 
+For convenience, we also provide a precompiled version of SimRA usable via command line that you can download from the [binary folder](https://github.com/ComputationalGenomics/SimRA/tree/master/binary). 
 
 Here we provide a short description on how to use it. For a more completed information please refer to the SimRA_UserManual.pdf file located in the binary folder.
 
@@ -70,6 +70,7 @@ scaffold_2admix -STR 40 10 6.9
 ```
 The whole path must be specified if the input/output directories inputSimRA, outputSimRA are located in a different directory of the executable SimRA.jar.
 
+#Contributing
 
 #Apache License v. 2.0
 Copyright 2015 IBM Corporation
