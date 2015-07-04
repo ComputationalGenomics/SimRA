@@ -50,8 +50,7 @@ The output directory must be created by the user before executing SimRA;
 - STR: it allows to get an output le containing information about STR polymorphisms;
 - STRs number: number of STR loci - integer;
 - state: initial state for each STR locus - integer;
-- muSTR: STR mutation rate in mut/locus/gen x 10^(-4) - non negative real
-number;
+- muSTR: STR mutation rate in mut/locus/gen x 10^(-4) - non negative real number;
 ```
 
 ##Example
