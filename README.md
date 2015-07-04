@@ -6,14 +6,14 @@ SimRA has been developed in java under the Eclipse Framework
 #Pre-requisites
 
 - Java JDK (version 1.6+)
-- Apache Commons Math library. The jar file commons-math3-3.5.jar must be downloaded and stored in the SimRA lib folder. You can dowload it from http://commons.apache.org/proper/commons-math/download_math.cgi.
+- Apache Commons Math library. The jar file commons-math3-3.5.jar must be downloaded and stored in the SimRA lib folder. You can dowload it from [here] (http://commons.apache.org/proper/commons-math/download_math.cgi).
 - Eclipse (Recommended, not required)
 
 #Get Started
 
 git clone git://github.com/ComputationalGenomics/SimRA
 
-or you may want directly import the project on Eclipse (please see this wiki: https://github.com/OneBusAway/onebusaway/wiki/Importing-source-code-into-Eclipse) 
+or you may want directly import the project on Eclipse (please see this [wiki](https://github.com/OneBusAway/onebusaway/wiki/Importing-source-code-into-Eclipse)). 
 
 #Citation
 
@@ -71,6 +71,7 @@ scaffold_2admix -STR 40 10 6.9
 ```
 The whole path must be specified if the input/output directories inputSimRA, outputSimRA are located in a different directory of the executable SimRA.jar.
 
+
 #Apache License v. 2.0
 Copyright 2015 IBM Corporation
 
@@ -85,3 +86,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+#Contact
+
