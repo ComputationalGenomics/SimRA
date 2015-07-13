@@ -10,8 +10,9 @@ SimRA has been developed in java under the Eclipse Framework
 - Eclipse (Recommended, not required)
 
 #Get Started
-
+```sh
 git clone git://github.com/ComputationalGenomics/SimRA
+```
 
 or you may want directly import the project on Eclipse (please see this [wiki](https://github.com/OneBusAway/onebusaway/wiki/Importing-source-code-into-Eclipse)). 
 
@@ -88,6 +89,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 #Contact
+
+If you have suggestions, questions or comments regarding SimRA, please write to: pa_ri_da (at) us.ibm.com 
+
+(remove the underscores)
 
 #Open Source @ IBM
 
