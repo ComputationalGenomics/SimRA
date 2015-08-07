@@ -1,0 +1,21 @@
+------------		SCAFFOLD DESCRIPTION		------------ 
+
+FIXED PARAMETERS 
+	- SNP mutation rate  =  1.5
+	- recombination rate =  0.1
+	- segment length   =  75
+
+Number of edges with more than one SNP mutation =  52
+Number of edges with no SNP mutation =  36
+
+-------- POPULATION 1 --------
+Population 1 is a LEAF of the scaffold 
+Number of extant units : 30
+Effective population size : 10000
+Total number of nodes : 79
+Total number of edges : 89
+Time threshold : 10.0
+Number of active lineages at time 10.0 : 1
+Total number of SNP mutations : 146
+----------------------------------
+

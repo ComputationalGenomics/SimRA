@@ -1,0 +1,16 @@
+g=75 r=0.3 mu=4.0 
+
+#begin_actual_populations
+[id=1 m=50 N=10000 end_time=0.730]
+[id=2 m=50 N=10000 end_time=0.096]
+[id=3 m=50 N=10000 end_time=0.198]
+#end_actual_populations
+
+#begin_events
+0.096 split(2) [id=4 N=10000 end_time=0.745] [id=5 N=10000 end_time=1.250]
+0.198 split(3) [id=6 N=10000 end_time= 0.730] [id=7 N=10000 end_time= 0.745]
+0.730 merge(1,6) [id=8 N=10000 end_time= 1.250]
+0.745 merge(4,7) [id=9 N=10000 end_time=2.150]
+1.250 merge(5,8) [id=10 N=10000 end_time=2.150]
+2.150 merge(9,10) [id=11 N=10000 end_time=20.0]
+#end_events

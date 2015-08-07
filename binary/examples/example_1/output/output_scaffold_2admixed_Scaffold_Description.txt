@@ -1,0 +1,131 @@
+------------		SCAFFOLD DESCRIPTION		------------ 
+
+FIXED PARAMETERS 
+	- SNP mutation rate  =  4.0
+	- recombination rate =  0.3
+	- segment length   =  75
+
+Number of edges with more than one SNP mutation =  306
+Number of edges with no SNP mutation =  241
+
+-------- POPULATION 1 --------
+Population 1 is a LEAF of the scaffold 
+Number of extant units : 50
+Effective population size : 10000
+Total number of nodes : 129
+Total number of edges : 145
+Time threshold : 0.73
+Number of active lineages at time 0.73 : 3
+Total number of SNP mutations : 169
+----------------------------------
+
+-------- POPULATION 2 --------
+Population 2 is a LEAF of the scaffold 
+Number of extant units : 50
+Effective population size : 10000
+Total number of nodes : 85
+Total number of edges : 87
+Time threshold : 0.096
+Number of active lineages at time 0.096 : 19
+Total number of SNP mutations : 52
+----------------------------------
+
+-------- POPULATION 3 --------
+Population 3 is a LEAF of the scaffold 
+Number of extant units : 50
+Effective population size : 10000
+Total number of nodes : 105
+Total number of edges : 114
+Time threshold : 0.198
+Number of active lineages at time 0.198 : 13
+Total number of SNP mutations : 93
+----------------------------------
+
+-------- POPULATION 4 --------
+Population 4 derives by the SPLITTING of population: 2at time 0.096
+Number of extant units : 9
+Effective population size : 10000
+Total number of nodes : 24
+Total number of edges : 29
+Time threshold : 0.745
+Number of active lineages at time 0.745 : 4
+Total number of SNP mutations : 118
+----------------------------------
+
+-------- POPULATION 5 --------
+Population 5 derives by the SPLITTING of population: 2at time 0.096
+Number of extant units : 9
+Effective population size : 10000
+Total number of nodes : 31
+Total number of edges : 39
+Time threshold : 1.25
+Number of active lineages at time 1.25 : 2
+Total number of SNP mutations : 116
+----------------------------------
+
+-------- POPULATION 6 --------
+Population 6 derives by the SPLITTING of population: 3at time 0.198
+Number of extant units : 6
+Effective population size : 10000
+Total number of nodes : 20
+Total number of edges : 27
+Time threshold : 0.73
+Number of active lineages at time 0.73 : 6
+Total number of SNP mutations : 65
+----------------------------------
+
+-------- POPULATION 7 --------
+Population 7 derives by the SPLITTING of population: 3at time 0.198
+Number of extant units : 6
+Effective population size : 10000
+Total number of nodes : 22
+Total number of edges : 30
+Time threshold : 0.745
+Number of active lineages at time 0.745 : 5
+Total number of SNP mutations : 54
+----------------------------------
+
+-------- POPULATION 8 --------
+Population 8  derives by the MERGING of 2 populations: 1 and 6at time 0.73
+Number of extant units : 8
+Effective population size : 10000
+Total number of nodes : 19
+Total number of edges : 23
+Time threshold : 1.25
+Number of active lineages at time 1.25 : 4
+Total number of SNP mutations : 45
+----------------------------------
+
+-------- POPULATION 9 --------
+Population 9  derives by the MERGING of 2 populations: 4 and 7at time 0.745
+Number of extant units : 9
+Effective population size : 10000
+Total number of nodes : 24
+Total number of edges : 29
+Time threshold : 2.15
+Number of active lineages at time 2.15 : 4
+Total number of SNP mutations : 106
+----------------------------------
+
+-------- POPULATION 10 --------
+Population 10  derives by the MERGING of 2 populations: 5 and 8at time 1.25
+Number of extant units : 5
+Effective population size : 10000
+Total number of nodes : 24
+Total number of edges : 33
+Time threshold : 2.15
+Number of active lineages at time 2.15 : 3
+Total number of SNP mutations : 98
+----------------------------------
+
+-------- POPULATION 11 --------
+Population 11  derives by the MERGING of 2 populations: 9 and 10at time 2.15
+Number of extant units : 5
+Effective population size : 10000
+Total number of nodes : 39
+Total number of edges : 55
+Time threshold : 20.0
+Number of active lineages at time 20.0 : 1
+Total number of SNP mutations : 262
+----------------------------------
+

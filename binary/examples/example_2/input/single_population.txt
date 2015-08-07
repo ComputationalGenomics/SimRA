@@ -1,0 +1,8 @@
+g=75 r=0.1 mu=1.5 
+
+#begin_actual_populations
+[id=1 m=30 N=10000 end_time=10.0]
+#end_actual_populations
+
+#begin_events
+#end_events
