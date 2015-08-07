@@ -31,7 +31,7 @@ In order for us to accept pull requests, the contributor must first complete a C
 
 You can download the CLAs here:
 
-- individual
-- corporate
+- [individual] (https://github.com/ComputationalGenomics/SimRA/blob/master/Contributing/cla-individual.pdf)
+- [corporate] (https://github.com/ComputationalGenomics/SimRA/blob/master/Contributing/cla-corporate.pdf)
 
 If you are an *IBMer*, please contact us directly as the contribution process is slightly different.
