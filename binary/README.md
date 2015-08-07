@@ -1,5 +1,5 @@
-#SimRA Executable
-SimRa is also provided as a Java executable via command line.
+#Executable
+SimRA (**Sim**ulation based on **R**andom-graphs **A**lgorithms)  is also provided as a Java executable via command line.
 
 
 #How to run?
