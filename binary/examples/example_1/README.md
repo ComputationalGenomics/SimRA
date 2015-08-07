@@ -13,8 +13,8 @@ java -jar SimRA.jar ~/Desktop/SimRA_JARandEXAMPLES/example_1/input/ input_scaffo
 
 
 The sub-directory *input* contains
-- an image file  *scaffold\_2admixed.jpg*  representing the scaffold that has been simulated as example;
-- a text input file for SimRA  *input\_scaffold\_2admixed.txt* defined by the user. The text file describes the structure of the scaffold together with all required parameters. 
+- an image file scaffold\_2admixed.jpg  representing the scaffold that has been simulated as example;
+- a text input file for SimRA input\_scaffold\_2admixed.txt defined by the user. The text file describes the structure of the scaffold together with all required parameters. 
 
 # OUTPUT FILES
 
