@@ -31,7 +31,7 @@ number;
 ```
 
 #Example
-To execute SimRA.jar it is necessary to reach the directory where the SimRA.jar is located. A detailed set of example can be find in the [examples](https://github.com/ComputationalGenomics/SimRA/tree/master/binary/examples) folder contains. Here a short overview of command lines to execute SimRA.jar are the following:
+To execute SimRA.jar it is necessary to reach the directory where the SimRA.jar is located. A detailed set of example can be find in the [examples](https://github.com/ComputationalGenomics/SimRA/tree/master/binary/examples) folder contains. For more detailed information about how to use SimRA refer to the user manual.  Here a short overview of command lines to execute SimRA.jar are the following:
 
 ##Without STR polymorphisms generation:
 ```sh
