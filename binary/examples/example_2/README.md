@@ -10,7 +10,7 @@ java -jar SimRA.jar ~/Desktop/SimRA_JARandEXAMPLES/example_2/input/ single_popul
 
 #INPUT FILES
 
-The sub-directory *input*contains a text input file for SimRA, *single_population.txt*, defined by the user. The text file contains all the required parameters to simulate a single population.
+The sub-directory *input* contains a text input file for SimRA, *single_population.txt*, defined by the user. The text file contains all the required parameters to simulate a single population.
 
 #OUTPUT FILES
 
