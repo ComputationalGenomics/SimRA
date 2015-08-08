@@ -29,6 +29,10 @@ $ java -jar SimRa.jar <whole path input directory> <name input file>.txt <whole 
 - muSTR: STR mutation rate in mut/locus/gen x 10^􀀀4 - non negative real
 number;
 ```
+#Requirements
+
+Please put here the Apache Commons Math library. The jar file commons-math3-3.5.jar must be downloaded and stored in the SimRA\_lib folder.
+
 
 #Example
 To execute SimRA.jar it is necessary to reach the directory where the SimRA.jar is located. A detailed set of example can be find in the [examples](https://github.com/ComputationalGenomics/SimRA/tree/master/binary/examples) folder contains. For more detailed information about how to use SimRA refer to the user manual.  Here a short overview of command lines to execute SimRA.jar are the following:
