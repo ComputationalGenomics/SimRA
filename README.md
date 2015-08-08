@@ -92,9 +92,9 @@ limitations under the License.
 
 #Contact
 
-If you have suggestions, questions or comments regarding SimRA, please write to: pa_ri_da (at) us.ibm.com 
+If you have suggestions, questions or comments regarding SimRA, please email us to: 
 
-(remove the underscores)
+pa_ri_da (at) us.ibm.com  (remove the underscores)
 
 #Open Source @ IBM
 
