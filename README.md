@@ -73,7 +73,7 @@ The whole path must be specified if the input/output directories inputSimRA, out
 
 #Contributing
 
-We welcome contributions but request that you follow these [guidelines folder](https://github.com/ComputationalGenomics/SimRA/blob/master/Contributing/Contributing.md).
+We welcome contributions but request that you follow the guidelines indicated [here](https://github.com/ComputationalGenomics/SimRA/blob/master/Contributing/Contributing.md).
 
 #Apache License v. 2.0
 Copyright 2015 IBM Corporation
