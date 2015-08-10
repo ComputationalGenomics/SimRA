@@ -1,7 +1,7 @@
 # Simulation based on Random-graphs Algorithms
 SimRA (**Sim**ulation based on **R**andom-graphs **A**lgorithms) is a framework for simulating generic and complex evolutionary scenarios of multiple populations with subdivision and admixture. The algorithm generates a network structure, called Ancestral Recombination Graph (ARG), that models coalescence and genetic exchange events (recombinations) with SNP as well as STR polymorphisms.
 
-It has been developed in java under the Eclipse Framework
+It has been developed in Java under the Eclipse Framework
 
 #Pre-requisites
 
