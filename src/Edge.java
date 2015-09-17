@@ -1,5 +1,7 @@
 /*
   Copyright 2015 IBM Corporation
+
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 
 You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
@@ -8,7 +10,10 @@ Unless required by applicable law or agreed to in writing, software distributed 
 the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF 
 ANY KIND, either express or implied. 
 See the License for the specific language governing permissions and limitations under the License.
+
+
 */
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -23,12 +28,14 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
  * An edge has its rate for recombination event that depends from the length of the segment that is carrying. 
  * When the edge is not active the id of the father node is a positive integer value and the time passed between the father event node and the son event node has to be computed. 
  *
+ *
  * @see Interval
  * @see Node
  * 
  */
- 
- 	
+public class Edge {
+
+	
 	//id of the edge
 	private int idEDGE;
 	//id of the object Node that is the son of this directed edge
@@ -233,7 +240,12 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 	 * @return the binomial value
 	 */
 	public static int getBinomial(int n, double p) {
-		 //TO BE IMPLEMENTED
+		  int x = 0;
+		  for(int i = 0; i < n; i++) {
+		    if(Math.random() < p)
+		      x++;
+		  }
+		  return x;
 		}
 	/**
 	 * The function computes and returns the number of STR mutations for the edge by Poisson Distribution
@@ -245,7 +257,11 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 	 */
 	public int computeNumberMutationsStr(double mu_str, int N, PopulationARG arg) {
 		   
-		  //TO BE IMPLEMENTED
+		   double lamda = mu_str*this.getTime()*arg.getN();
+		   PoissonDistribution Prand = new PoissonDistribution(lamda);
+		   int y = Prand.sample();
+		   
+		   return y;
 	}
 	/**
 	 * The procedure computes the delta value for each STR locus that is present in one of the segments carried by the edge
@@ -256,7 +272,40 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 	 */
 	public void computeDeltaStrs(int N, PopulationARG arg) {
 		
-	//TO BE IMPLEMENTED
+		//Get the list of STR of the parent node
+		ArrayList<Str> strs_parent = arg.getNodeSet().get(this.getId_fath()).getStrs();
+		this.setDeltaStr(new HashMap<Double, Integer>());
+		
+		for(int i = 0; i < strs_parent.size(); i++) {
+			
+			
+			boolean found = false;
+			
+			for(int j = 0; j < segments.size() && !found; j++) {
+				if(strs_parent.get(i).getLocation() >= segments.get(j).getStart() && strs_parent.get(i).getLocation() <= segments.get(j).getEnd()){
+					found = true;
+				}
+			}
+			
+			if(found == false){
+				arg.getNodeSet().get(this.getId_fath()).getStrs().get(i).setPresence(false);
+			}
+			else {
+			
+				//1 compute the number of mutations 
+				int y = computeNumberMutationsStr(strs_parent.get(i).getMu_rate(), N, arg);
+				
+				//2 extract number of successes from binomial distribution
+				int x = getBinomial(y, 0.5);
+				
+				//3 compute the delta for the strs
+				int delta = 2*x-y;
+				
+				//4 store the delta in the map carried by the edge with the ID of the edge
+				deltaStr.put(strs_parent.get(i).getLocation(),delta);
+			}
+			
+		}
 	}
 	/**
 	 * This procedure computes and sets the recombination rate for this particular edge or lineage
@@ -265,7 +314,10 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 	 * @param g total length of the segment in the extant units (parameter given by the user - integer value)
 	 */
 	public void computeRate(int N, double recomb, double g){
+		
 		rate = N*g*recomb*length;
+		//Hudson version
+		//rate=N*g*recomb;
 	}
 	/**
 	 * The function computes the total density of the segment carried by the edge. That is the density is the sum of the lengths of the solids
@@ -273,7 +325,12 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 	 * @return the density of the segment carried by the edge.
 	 */
 	public double computeDensity(){
-		//TO BE IMPLEMENTED
+		double sumD = 0;
+		for(int i = 0; i < segments.size(); i++) {
+			sumD = sumD + (segments.get(i).getEnd()-segments.get(i).getStart());
+		}
+		density = sumD;
+		return sumD;
 	}
 	/**
 	 * The function computes the total length of the segment carried by the edge. The total length considers also holes that can be present among
@@ -281,7 +338,8 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 	 * @see Interval
 	 */
 	public void computeLength(){
-	//TO BE IMPLEMENTED
+		ArrayList<Interval> seg = this.getSegments();
+		length = seg.get(seg.size()-1).getEnd() - seg.get(0).getStart();
 	}
 	
 	/**
@@ -289,7 +347,10 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 	 * @return a String representing the portions of genetic material carried by the edge 
 	 */
 	public String printSegments(){
-		//TO BE IMPLEMENTED
+		String intervals = "";
+		for(int i = 0 ; i < segments.size(); i++){
+			intervals = intervals+"["+segments.get(i).getStart()+","+segments.get(i).getEnd()+"]";
+		}
+		return intervals;
 	}
- 
- 
+}
