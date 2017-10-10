@@ -4,7 +4,7 @@ SimRA (**Sim**ulation based on **R**andom-graphs **A**lgorithms) is a framework 
 We proposed two framework forward simulation (fwdSimRA) and backward (SSimra)
 
 
-#Get Started
+# Get Started
 ```sh
 git clone git://github.com/ComputationalGenomics/SimRA
 ```
@@ -15,11 +15,11 @@ Please cite the following article if you use SimRA in your research:
 A.P. Carrieri, F. Utro, L. Parida. Sampling ARG of multiple populations under complex configurations of subdivision and admixture. Bioinformatics, 2015.
 
 
-#Contributing
+# Contributing
 
 We welcome contributions but request that you follow the guidelines indicated [here](https://github.com/ComputationalGenomics/SimRA/blob/master/Contributing/Contributing.md).
 
-#Apache License v. 2.0
+# Apache License v. 2.0
 Copyright 2015 IBM Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-#Contact
+# Contact
 
 If you have suggestions, questions or comments regarding SimRA, please email us to: 
 
