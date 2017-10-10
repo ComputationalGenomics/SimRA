@@ -40,6 +40,6 @@ If you have suggestions, questions or comments regarding SimRA, please email us 
 
 pa_ri_da (at) us.ibm.com  (remove the underscores)
 
-#Open Source @ IBM
+# Open Source @ IBM
 
 Find more open source projects on the [IBM Github Page](http://ibm.github.io/)
