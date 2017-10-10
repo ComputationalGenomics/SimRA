@@ -8,7 +8,7 @@ We proposed two framework forward simulation (fwdSimRA) and backward (SSimra)
 ```sh
 git clone git://github.com/ComputationalGenomics/SimRA
 ```
-#Citation
+# Citation
 
 Please cite the following article if you use SimRA in your research:
 
