@@ -2,7 +2,7 @@
 
 SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
-Last Update: 08/11/2016
+Last Update: 08/25/2017
 
 This is the implementation of the Individuals class where everything that relates to one run of a generation is generated and kept
 It contains the Chromosome Containers for male and female which is referred to while selecting the parents for each individuals
@@ -21,24 +21,27 @@ It contains the Chromsome IDs of each chromosomes and also the chromosome inform
 #include <stdexcept>
 #include<math.h>
 #include<limits>
+#include<omp.h>
 #include<map>
+#include<gsl/gsl_rng.h>
+#include<gsl/gsl_randist.h>
+#include<functional>
 #include "Individuals.h"
 #include "GlobalIndivs.h"
 #include "Events.h"
-#define FITNESS_MAX 0.001
-#define FITNESS_MIN -0.001
-using namespace std;
-
+//using namespace std;
 
 void Individuals :: ReserveSpace(int totalSize){
-	ChromContainer.reserve(totalSize);	
+	ChromContainer.resize(totalSize);	
 	}
 //Chromosome Container is the main building block for every generation. It stores information about what are the diploids for each individual across the number of SNPs. 
-void Individuals :: Addpairs(pair<pair<string,string>,pair<string,string> > apair){		
-	ChromContainer.push_back(apair);
+void Individuals :: Addpairs(std::pair<std::pair<string,string>,std::pair<string,string> > apair,int loc){		
+	//std::cout << std::endl << "Val of Loc is: " << loc << std::endl <<astd::pair.first.first << "  " << astd::pair.first.second << "  " << astd::pair.second.first << "  " << astd::pair.second.second << std::endl;
+	ChromContainer[loc] = apair;
+	//ChromContainer.insert(ChromContainer.begin()+loc,astd::pair);
 	}
 
-vector<pair<pair<string,string>, pair<string,string> > > Individuals :: getChromContainer(){
+std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > Individuals :: getChromContainer(){
 	return ChromContainer;
 	}
 void Individuals :: DestroyCC (){
@@ -46,12 +49,12 @@ void Individuals :: DestroyCC (){
 	}
 				 
 void Individuals :: DisplayContents(){
-	for( vector<pair<pair<string,string>, pair<string,string> > >::iterator it = ChromContainer.begin(); it != ChromContainer.end(); ++it){
+	for( std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > >::iterator it = ChromContainer.begin(); it != ChromContainer.end(); ++it){
 			
-		cout << " " << it->first.first << "," << it->first.second << " | ";
-		cout << " " << it->second.first << "," << it->second.second << endl;
+		std::cout << " " << it->first.first << "," << it->first.second << " | ";
+		std::cout << " " << it->second.first << "," << it->second.second << std::endl;
 		}
-	cout << endl;
+	std::cout << std::endl;
 	}
 
 void Individuals :: Addlabel(){
@@ -63,50 +66,52 @@ void Individuals :: Addlabel(){
 	}
 //It picks a random number of 4 digits, converts it to string and follows the nomenclature of Chrom_GenNum_RandomNumber to name the chromosome ID
 string Individuals :: AddandGetChromName(int GenNum){
-	int num = rand()%9000+1000;
-	char numstr[10];
-	snprintf(numstr,10,"%d",num);
-	char numstr1[10];
-	snprintf(numstr1,10,"%d",GenNum);
+	//int num = rand()%9000+1000;
+	int num = (int)(RandU(0,1)*1000000)%9000+1000;
+	std::string numstr = std::to_string(num);
+	std::string numstr1 = std::to_string(GenNum);
+	
 	string label = chromid + "_" + numstr1 + "_" + numstr; 
-	ChromLabels.push_back(label);
 	return label; 
 }
 	
 void Individuals :: DisplayLabels(){
-	for (vector<string>:: iterator it = SNPlabels.begin(); it != SNPlabels.end(); ++it){			
-		cout << *it << " " ;
+	for (std::vector<string>:: iterator it = SNPlabels.begin(); it != SNPlabels.end(); ++it){			
+		std::cout << *it << " " ;
 		}
 	}
 
 //This gets the c=location segment randomly for each SNP across the length of chromosome, L is always greater than NumberofSNPs
-vector<int> Individuals :: GetLocSegment(int NumberofSNPs,int L){
-	vector <int> ChromSegLoc; 
-	int *RandNumbers = new int[L];
+std::vector<int> Individuals :: GetLocSegment(int NumberofSNPs,int L){
+	std::vector<int> ChromSegLoc(NumberofSNPs);
 	int uniqueflag;
-	int randloc;	
-	for (int i = 0; i < L; i++) 
-		RandNumbers[i] = i; 
-	random_shuffle(RandNumbers,RandNumbers+L);
-	for (int i = 0; i < NumberofSNPs; i++)
-		ChromSegLoc.push_back(RandNumbers[i]);
-							
+	int randloc;
+	int *RandNumbers = new int[L];
+	int *SelRandNum = new int [NumberofSNPs];
+	for (int z = 0; z < L; z++) 
+		RandNumbers[z] = z; 
+	
+	gsl_ran_shuffle(threadvec[omp_get_thread_num()],RandNumbers, L, sizeof (int));
+	//gsl_ran_choose(threadvec[omp_get_thread_num()],SelRandNum, NumberofSNPs, RandNumbers, L, sizeof (int));
+	for(int z = 0; z < NumberofSNPs; z++)
+		ChromSegLoc[z] = RandNumbers[z];
 	return ChromSegLoc; 
 	}
 
 //This defines and fetches the fitness table for each individual and this remains constant throughout the simulation	
-double* Individuals :: getFitnessTable(int NumberofSNPs){	
+double* Individuals :: getFitnessTable(int NumberofSNPs, double FITNESS_MAX, double FITNESS_MIN){	
 	double *PopulationFitnessTable = new double[NumberofSNPs*diploidSize];	
+	std::cout << std::endl << "Fitness MAX is " << FITNESS_MAX << " and " << "Fitness MIN is " << FITNESS_MIN << std::endl;
 	for ( int i = 0; i <  NumberofSNPs; i++ ){
-		vector<int> borderIndices;
+		std::vector<int> borderIndices;
 		borderIndices.push_back(0);
 				
 		for (int j = 0; j < diploidSize ; j++){
 			double valinsert = doubleRand(FITNESS_MIN,FITNESS_MAX); 
 			PopulationFitnessTable[i*diploidSize + j] = valinsert;	
 			}	
-		int baseIndex = rand()%10;
-		PopulationFitnessTable[i*diploidSize+baseIndex] = 0.00; 
+		//int baseIndex = rand()%10;
+		//PopulationFitnessTable[i*diploidSize+baseIndex] = 0.00; 
 	}
 				 
 	return PopulationFitnessTable;			
@@ -116,17 +121,17 @@ double* Individuals :: getFitnessTable(int NumberofSNPs){
 void Individuals :: DisplayTable(double* PopulationFitnessTable, int NumberofSNPs){
 	for (int i = 0; i < NumberofSNPs; i++){	
 		for (int j = 0; j < diploidSize; j++){
-				cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
+				std::cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
 			}
-			cout << endl;
+			std::cout << std::endl;
 		}
 	}
 
-//This gets the position of the allele by finding where it lies in the vector of diploids which is in GlobalIndivs class 
-int Individuals :: getPosAllele(vector<string> RetrievedPair){
+//This gets the position of the allele by finding where it lies in the std::vector of diploids which is in GlobalIndivs class 
+int Individuals :: getPosAllele(std::vector<string> Retrievedpair){
 	
-	string allelefront = RetrievedPair[1] + RetrievedPair[3];
-    string alleleend = RetrievedPair[3] + RetrievedPair[1];
+	string allelefront = Retrievedpair[1] + Retrievedpair[3];
+    string alleleend = Retrievedpair[3] + Retrievedpair[1];
 	int pos_allele;
 
     if (find (diploidVec.begin(), diploidVec.end(), allelefront) != diploidVec.end())
@@ -137,137 +142,166 @@ int Individuals :: getPosAllele(vector<string> RetrievedPair){
 
 	return pos_allele; 
 	}
-pair<bool,pair<AlleleInfo,AlleleInfo> > Individuals :: RetrieveListElement(int x){
-	//cout << endl << "eg" << endl;
+/*std::pair<bool,std::pair<AlleleInfo,AlleleInfo> > Individuals :: RetrieveListElement(int x){
+	//std::cout << std::endl << "eg" << std::endl;
 	return ParentInfoList[x]; 
-}
+}*/
 //This method mutates the SNPs depending on the mutation rate specified by the user
 //It creates 4 bins, one with no mutation and other into three parts where possible mutation might take place to the other three bases. 
-//This is done everytime the parents sends a set of SNPs to the child 
+//This is done everytime the parents sends a std::set of SNPs to the child 
 //This also saves the SNPs before and after mutations, helping us track while building the ARGs
-pair<vector<string>, vector<pair<string,int> > > Individuals :: Mutate(vector<string> haploids, double MutationRate){
+
+std::pair<std::pair<std::vector<string>, int >, int> Individuals :: Mutate(std::vector<string> haploids, double MutationRate, int L){
+
 	int numSNP = haploids.size();
 	int mutidx; 
-	double randmut;
 	string targetallele;
-	vector<string> tmpbaseVec;
-	vector<string> mutatedhaploids; 
-	vector<pair<string,int> > mutatedpos;
-	pair<vector<string>, vector<pair<string,int> > > MutAlleleContainer;
+	std::vector<string> tmpbaseVec(baseVec.size());
+	std::vector<string> mutatedhaploids(numSNP); 
+	std::pair<std::pair<std::vector<string>, int >, int> MutAlleleContainer;
 	int index; 
-	for (int i = 0; i < numSNP; i++){
-		tmpbaseVec = baseVec;
-		randmut = ((double) rand()/(double) (RAND_MAX));
-		targetallele = haploids[i];
-		//cout << endl << "Target: " << targetallele << endl;
-		if(find (baseVec.begin(), baseVec.end(), targetallele) != baseVec.end())
-			index = distance(baseVec.begin(), find (baseVec.begin(), baseVec.end(), targetallele));
-		tmpbaseVec.erase(tmpbaseVec.begin() + index);
-		//cout << endl << "Remaining bases" << endl; 
-		//for(vector<string>::iterator it1 = tmpbaseVec.begin();it1 != tmpbaseVec.end(); ++it1)
-		//	cout << *it1 << endl;
-		if (randmut > 0 && randmut < (1-MutationRate)) mutidx = 1;
-		else if (randmut >= (1-MutationRate) && randmut < ((3-(2*MutationRate))/3)) mutidx = 2;
-		else if (randmut >= ((3-(2*MutationRate))/3) && randmut < ((3-MutationRate)/3)) mutidx = 3;
-		else if (randmut >= ((3-MutationRate)/3) && randmut < 1) mutidx = 4; 
-		
-		switch(mutidx){
-			
-			case 1:	mutatedhaploids.push_back(haploids[i]);
-					//cout << endl << "at pos: " << i << " " << haploids[i] << " was not changed" << endl; 
-					mutatedpos.push_back(make_pair("",i));
-					break;					
-			case 2:	mutatedhaploids.push_back(tmpbaseVec[0]); 
-					//cout << endl << "at pos: " << i << " " << haploids[i] << " was changed to: " << tmpbaseVec[0] << endl;
-					mutatedpos.push_back(make_pair(haploids[i],i));
-					break; 
-			case 3:	mutatedhaploids.push_back(tmpbaseVec[1]);
-					//cout << endl << "at pos: " << i << " " << haploids[i] << " was changed to: " << tmpbaseVec[1] << endl;
-					mutatedpos.push_back(make_pair(haploids[i],i));
-					break; 
-			case 4:	mutatedhaploids.push_back(tmpbaseVec[2]); 
-					//cout << endl << "at pos: " << i << " " << haploids[i] << " was changed to: " << tmpbaseVec[2] << endl;
-					mutatedpos.push_back(make_pair(haploids[i],i));
-					break; 
-		}
-	}
-	//for (vector<pair<string,int> >::iterator it = mutatedpos.begin(); it != mutatedpos.end(); ++it){
-		//cout << it->first << " | " << it->second << endl; 
-	//}
-	//cout << endl << "------- " << endl; 
-	//for (vector<string>::iterator it = mutatedhaploids.begin(); it != mutatedhaploids.end(); ++it){
-		//cout << *it << endl;
-	//}
-	MutAlleleContainer = make_pair(mutatedhaploids,mutatedpos);
-	return MutAlleleContainer; 
-} 
 
+	int localmut;
+	if (MutationRate == 0){
+		mutatedhaploids = haploids;
+
+		localmut = 0;
+	}
+	else{
+		
+		int *RandNumbers = new int[numSNP];
+		for (int z = 0; z < numSNP; z++) 
+			RandNumbers[z] = z; 
+			
+		unsigned int SNPsToMutate = gsl_ran_poisson(threadvec[omp_get_thread_num()],MutationRate*L);
+		//std::cout << std::endl << "Number of SNPs to Mutate is " << SNPsToMutate << std::endl;
+		
+		int *MutateLocs= new int[SNPsToMutate];
+
+		tmpbaseVec = baseVec;
+		double randmut = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
+		gsl_ran_shuffle(threadvec[omp_get_thread_num()],RandNumbers, numSNP, sizeof (int));
+		//gsl_ran_choose(threadvec[omp_get_thread_num()], MutateLocs, SNPsToMutate, RandNumbers, numSNP, sizeof (int));
+		
+		mutatedhaploids = haploids;
+		localmut = SNPsToMutate;
+		for (int z = 0; z < SNPsToMutate; z++){
+			if(flagmut == 0){
+				SelectedSNPID = RandNumbers[0];
+				//std::cout << std::endl << "Updated at " << SelectedSNPID << std::endl;
+				flagmut = 1;
+			}
+			targetallele = mutatedhaploids[RandNumbers[z]];
+			for( int kk = 0; kk < baseVec.size(); kk++){
+				if(baseVec[kk].compare(targetallele) == 0)
+					tmpbaseVec.erase(tmpbaseVec.begin()+kk);
+			}
+			if (randmut > 0 && randmut < 1/3) {
+				mutatedhaploids[RandNumbers[z]] = tmpbaseVec[0]; 
+				MutCount++;
+			}
+			else if (randmut >= 1/3 && randmut < 2/3) {
+					mutatedhaploids[RandNumbers[z]] = tmpbaseVec[1];
+					MutCount++;
+			}
+			else if (randmut >= 2/3 && randmut < 1) {
+					mutatedhaploids[RandNumbers[z]] = tmpbaseVec[2]; 
+					MutCount++;
+			}
+		}			
+}
+	
+	MutAlleleContainer = std::make_pair(std::make_pair(mutatedhaploids,localmut),SelectedSNPID);
+	//if (flagmut == 1)
+	//	SelectedSNPID = -1;
+	mutatedhaploids.clear();
+	return MutAlleleContainer; 
+}
 //This method gets the alleles for the child when there's no recombination. This can happen two ways, either father sends all of his father's SNPs to child, or,
 //the father sends all of his mother's. After it's decided which, the information is kept in the container called Contributing Chromosomes.
 //The chromosome which is contributing nothing to the child has 0 in its position, indicating it's contribution. This is helpful while building the ARG. 
 //It collapses the edges when there's no recombination.
-AlleleInfo Individuals :: GetAllelesforChild(int Pidx, vector<pair<pair<string,string>, pair<string,string> > > CC, vector<int> SNPlocs, double MutationRate, int GenNum, int chromnum){
-	//cout << endl << "NO CROSSOVER" << endl;
+AlleleInfo Individuals :: GetAllelesforChild(int Pidx, std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > CC, std::vector<int> SNPlocs, double MutationRate,int L, int GenNum, int chromnum){
+  
+ //	std::cout << std::endl << "NO CROSSOVER" << std::endl;
+	AlleleInfo toChild; 
 	int numSNP = SNPlocs.size();
-	pair<pair<string,int>,pair<string,int> > ContributingChroms; 
-	vector<string> haploids; 
-	string chromID,theotherID;	
-	pair<string,int> c1,c2; 
-	for (int i = 0; i < numSNP; i++){
-		pair<pair<string,string>, pair<string,string> > chrompair = ChromContainer[Pidx*numSNP + i];
-		if (chromnum == 1){
-			haploids.push_back(chrompair.first.second);
-			if (i==0){
+	std::pair<std::pair<string,int>,std::pair<string,int> > ContributingChroms; 	
+	std::pair<string,int> c1,c2; 
+	int i;
+	std::vector<string> MutatedHaploids;
+	int localmut;
+			string chromID,theotherID;	
+		std::vector<string> haploids(numSNP); 
+
+	if (chromnum == 1){
+	for (int z = 0; z < numSNP; z++){
+		std::pair<std::pair<string,string>, std::pair<string,string> > chrompair = CC[Pidx*numSNP + z];
+			haploids[z] = chrompair.first.second;
+			if (z==0){
 				chromID = chrompair.first.first; 
 				theotherID = chrompair.second.first; 
 			}
 		}
-		else{	
-			haploids.push_back(chrompair.second.second);
-			if (i==0){
+	}
+	else{	
+	for (int z = 0; z < numSNP; z++){
+		std::pair<std::pair<string,string>, std::pair<string,string> > chrompair = CC[Pidx*numSNP + z];
+
+			haploids[z] = chrompair.second.second;
+			if (z==0){
 				chromID = chrompair.second.first;
 				theotherID = chrompair.first.first; 
 			}	
 		}
 	}
-	c1 = make_pair(chromID,numSNP);
-	c2 = make_pair(theotherID,0);
+	string chromname; 
+	c1 = std::make_pair(chromID,numSNP);
+	c2 = std::make_pair(theotherID,0);
 	//They pack the chromosome contributions at this stage
-	ContributingChroms = make_pair(c1,c2);
-	string chromname = AddandGetChromName(GenNum);
-	//Now they mutate the SNPs that was sent 
-	pair<vector<string>, vector<pair<string,int> > > MutBox = Mutate(haploids,MutationRate);
-	vector<string> MutatedHaploids = MutBox.first; 
-	vector<pair<string,int> > MutatedposInfo = MutBox.second; 
+	ContributingChroms = std::make_pair(c1,c2);
+	chromname = AddandGetChromName(GenNum);
+	//}
+		std::string s = "";
+		for (const auto &piece1 : haploids) s += piece1;
 
+	std::pair<std::pair<std::vector<string>, int >, int> MutBox;
+	
+	 MutBox = Mutate(haploids,MutationRate,L);
+	
+	MutatedHaploids = MutBox.first.first; 
+	localmut = MutBox.first.second;
+	int snpid = MutBox.second;
+	//MutatedposInfo = MutBox.second; 
 	Events event; 
+	int localrecomb = 0;
 	int pos = -1; //might change afterwards, don't worry about this
-	//at this point they populate the structure to record the event and return the struct to the child. 
-	AlleleInfo toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, MutatedposInfo);
-		
-		return toChild;
+	
+	toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb, snpid);
+	
+	haploids.clear();
+	MutatedHaploids.clear();
+
+	return toChild;
 }
+
 //This builds the list for each individual in a given generation with all their parent info in it. Easier to access any given individual's info
 //while building the ARG (although, at this stage I am not using this, but it's an useful data structure to have)
-void Individuals :: PushToList(pair<bool, pair <AlleleInfo,AlleleInfo> > structpairs){
-	this->ParentInfoList.push_back(structpairs);
-}
+/*void Individuals :: PushToList(std::pair<bool, std::pair <AlleleInfo,AlleleInfo> > structstd::pairs){
+	this->ParentInfoList.push_back(structstd::pairs);
+}*/
 
 //This displays the aforementioned list for each individual
 void Individuals :: DisplayParentList(){
-	for(vector<pair<bool, pair<AlleleInfo,AlleleInfo> > >::iterator it = ParentInfoList.begin(); it != ParentInfoList.end(); ++it){
+	for(std::vector<std::pair<bool, std::pair<AlleleInfo,AlleleInfo> > >::iterator it = ParentInfoList.begin(); it != ParentInfoList.end(); ++it){
 	
-		cout << endl << " | " << "FatherID: "  << it->second.first.ParentID << " | " << "Chromosome ID: " << it->second.first.ToTheChild.first << " | " << endl;
-		cout << endl <<  "From Father ------ Chromosome: " << it->second.first.ContChrom.first.first << " Contributing: " << it->second.first.ContChrom.first.second << " and Chromosome: " << it->second.first.ContChrom.second.first << " Contributing: " << it->second.first.ContChrom.second.second << endl; 
+		std::cout << std::endl << " | " << "FatherID: "  << it->second.first.ParentID << " | " << "Chromosome ID: " << it->second.first.ToTheChild.first << " | " << std::endl;
+		std::cout << std::endl <<  "From Father ------ Chromosome: " << it->second.first.ContChrom.first.first << " Contributing: " << it->second.first.ContChrom.first.second << " and Chromosome: " << it->second.first.ContChrom.second.first << " Contributing: " << it->second.first.ContChrom.second.second << std::endl; 
 
-		for(vector<pair<string,int> >::iterator rot = it->second.first.BeforeMutation.begin(); rot != it->second.first.BeforeMutation.end(); ++rot)
-			cout << "-----Baba Original haploid: " << rot->first << " --------- " << "Mutation Position: " << rot->second << endl; 
-		
-		cout << endl << " | " << "MotherID: "  << it->second.second.ParentID << " | " << "Chromosome ID: " << it->second.second.ToTheChild.first << " | " << endl;
-		cout << endl <<  "From Mother ------ Chromosome: " << it->second.second.ContChrom.first.first << " Contributing: " << it->second.second.ContChrom.first.second << " and Chromosome: " << it->second.second.ContChrom.second.first << " Contributing: " << it->second.second.ContChrom.second.second << endl; 
+	
+		std::cout << std::endl << " | " << "MotherID: "  << it->second.second.ParentID << " | " << "Chromosome ID: " << it->second.second.ToTheChild.first << " | " << std::endl;
+		std::cout << std::endl <<  "From Mother ------ Chromosome: " << it->second.second.ContChrom.first.first << " Contributing: " << it->second.second.ContChrom.first.second << " and Chromosome: " << it->second.second.ContChrom.second.first << " Contributing: " << it->second.second.ContChrom.second.second << std::endl; 
 
-		//for(vector<pair<string,int> >::iterator rot = it->second.BeforeMutation.begin(); rot != it->second.BeforeMutation.end(); ++rot)
-			//cout << "-----Maa Original haploid: " << rot->first << " --------- " << "Mutation Position: " << rot->second << endl;
 	}
 }	
 
@@ -277,130 +311,182 @@ indicating forward contribution and the number of SNPs contributed, the negative
 There will be no 0 in the position, this time. This is helpful while building the ARG. 
 It collapses the edges when there's no recombination. */
 
-AlleleInfo Individuals :: GetCrossOverAlleles(int Pidx, vector<pair<pair<string,string>, pair<string,string> > > CC, vector<int> SNPlocs, double MutationRate, int L, int GenNum, int chromnum){
-	//cout << endl << "YES CROSSOVER" << endl; 
+AlleleInfo Individuals :: GetCrossOverAlleles(int Pidx, std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > CC, std::vector<int> SNPlocs, double MutationRate, int L, int GenNum, int chromnum){
+//	std::cout << std::endl << "YES CROSSOVER" << std::endl; 
 	int pos;
 	int numSNP = SNPlocs.size();
-	vector <string> haploids; 
-	vector<int> SNPidx; 
-	pair<pair<string,string>,pair<string,string> > chrompair;
-	string chromID;
-	pair<pair<string,int>,pair<string,int> > ContributingChroms; 
-	pair<string,int> c1,c2; 
+	std::vector <string> haploids(numSNP); 
+	std::vector<int> SNPidx(numSNP); 
+	std::pair<std::pair<string,string>,std::pair<string,string> > chrompair;
+	string chromID, chromname;
+	std::pair<std::pair<string,int>,std::pair<string,int> > ContributingChroms; 
+	std::pair<string,int> c1,c2;
+	std::pair<std::pair<std::vector<string>, int >, int> MutBox;
+	std::vector<string> MutatedHaploids;
+	Events event;
+	std::string s;
+	int localrecomb = 0;
+	int localmut;
+	//std::vector<std::pair<string,int> > MutatedposInfo;
+	AlleleInfo toChild; 
 	//randomly choses C out of L
 	//The first part is crossover1 and the second part is crossover2, delineated with the if-else
-	int crossoveridx = rand()%(L + 1);
+	//int crossoveridx = RandU(0,1);
+	//int crossoveridx = gsl_rng_uniform(threadvec[omp_get_thread_num()])%(L+1);
+	int crossoveridx = gsl_rng_uniform_int(threadvec[omp_get_thread_num()], L);
+	
+	//int crossoveridx = rand()%(L + 1);
+	//std::cout << std::endl << "Crossoveridx was: " << crossoveridx << endl;
 	if (chromnum == 1){
+		
+			int ct = 0;
 			for (int i = 0; i < numSNP; i++){
 				if (SNPlocs[i] <= crossoveridx)
-					SNPidx.push_back(i);
+				ct++;	
 			}
+			SNPidx.resize(ct);
 			if(SNPidx.size() == 0){
-				chrompair=CC[Pidx*numSNP];
-				chromID = chrompair.first.first;
-			}			
-			for(int i = 0; i < SNPidx.size(); i++){ 
-				chrompair = CC[Pidx*numSNP + SNPidx[i]];
-				haploids.push_back(chrompair.first.second);
-				if (i==0)
-					chromID = chrompair.first.first;  
+				toChild = GetAllelesforChild(Pidx,CC,SNPlocs,MutationRate,L,GenNum,2);
+
 			}
-			pos = SNPidx.size();
-			c1 = make_pair(chromID,pos);
-			SNPidx.clear();
-			for (int i = 0; i < numSNP; i++){
-				if (SNPlocs[i] > crossoveridx)
-					SNPidx.push_back(i);
-			}
-			if(SNPidx.size() == 0){
-				chrompair = CC[Pidx*numSNP];
-				chromID = chrompair.second.first;
-			}
-			for (int i = 0; i < SNPidx.size(); i++){
-				chrompair = CC[Pidx*numSNP + SNPidx[i]];
-				haploids.push_back(chrompair.second.second);
-				if (i==0)
+			else{
+				localrecomb++;
+				for(int z = 0; z < SNPidx.size(); z++){ 
+			
+					chrompair = CC[Pidx*numSNP + z];
+					haploids[z] = chrompair.first.second;
+		
+					if (z==0)
+						chromID = chrompair.first.first;  
+				}
+				pos = SNPidx.size();
+				c1 = std::make_pair(chromID,pos);
+				SNPidx.clear();
+				SNPidx.resize(numSNP-pos);
+
+				if(SNPidx.size() == 0){
+					//RecombCount++;
+					chrompair = CC[Pidx*numSNP];
 					chromID = chrompair.second.first;
-				//cout << "at pos: " << SNPidx[i] << " from Chr2: " << chrompair.second.second << endl;
+					c2 = std::make_pair(chromID, 0);
+				}
+			    else{
+			
+					for (int z = 0; z < SNPidx.size() ; z++){
+						chrompair = CC[Pidx*numSNP + pos+z];	
+						haploids[pos+z] = chrompair.second.second;
+				
+						if (z==0)
+							chromID = chrompair.second.first;
+					}
+					pos = SNPidx.size();
+					RecombCount++;
+					c2 = std::make_pair(chromID,-pos);	
+				}
+		
+				ContributingChroms = std::make_pair(c1,c2);
+				MutBox = Mutate(haploids,MutationRate,L);
+				MutatedHaploids = MutBox.first.first; 
+				localmut = MutBox.first.second; 
+				int snpid = MutBox.second;
+				chromname = AddandGetChromName(GenNum);
+		//passed on to the child in the AlleleInfo container
+				toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb, snpid);
+		
+				haploids.clear();
+				haploids.resize(numSNP);
+				SNPidx.clear();
+				
 			}
-			pos = SNPidx.size();
-			c2 = make_pair(chromID,-pos);		
-		ContributingChroms = make_pair(c1,c2);
 		}
 	else {
+			
+			int ct = 0;
+			localrecomb++;
 			for (int i = 0; i < numSNP; i++){
 				if (SNPlocs[i] <= crossoveridx)
-					SNPidx.push_back(i);
+				ct++;	
 			}
+			SNPidx.resize(ct);
 			if(SNPidx.size() == 0){
-				chrompair=CC[Pidx*numSNP];
-				chromID = chrompair.second.first;
-			}			
-			for(int i = 0; i < SNPidx.size(); i++){
-				chrompair = CC[Pidx*numSNP + SNPidx[i]];
-				haploids.push_back(chrompair.second.second);
-				if (i==0)
-					chromID = chrompair.second.first;
-				//cout << "at pos: " << SNPidx[i] << " from Chr2: " << chrompair.first.second << endl; 
+				toChild = GetAllelesforChild(Pidx,CC,SNPlocs,MutationRate,L,GenNum,1);
 			}
-			pos = SNPidx.size();
-			c1 = make_pair(chromID,pos);
-			SNPidx.clear();
-			for (int i = 0; i < numSNP; i++){
-				if (SNPlocs[i] > crossoveridx)
-					SNPidx.push_back(i);
-			}
-			//cout << endl << SNPidx.size () << endl;
-			if(SNPidx.size() == 0){
-				chrompair=CC[Pidx*numSNP];
-				chromID = chrompair.first.first;
-			}
-			for (int i = 0; i < SNPidx.size(); i++){
-				chrompair = CC[Pidx*numSNP + SNPidx[i]];
-				haploids.push_back(chrompair.first.second);
-				if (i==0)
-					chromID = chrompair.first.first;
-			}
-			pos = SNPidx.size();
-			c2 = make_pair(chromID,-pos);
-			//packs everything into contributing chromosome container indicating positions.
-		ContributingChroms = make_pair(c1,c2);
- 
-		}
-		//Mutates the SNPs before passing them on to the child as described in the Mutate method
-		pair<vector<string>, vector<pair<string,int> > > MutBox = Mutate(haploids,MutationRate);
-		vector<string> MutatedHaploids = MutBox.first; 
-		vector<pair<string,int> > MutatedposInfo = MutBox.second; 
-
-		string chromname = AddandGetChromName(GenNum);
-		Events event; 
-		//passed on to the child in the AlleleInfo container
-		AlleleInfo toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, MutatedposInfo);
+			else{
 		
-		return toChild;
+				for(int z = 0; z < SNPidx.size(); z++){
+				
+					chrompair = CC[Pidx*numSNP + z];
+					haploids[z] = chrompair.second.second;
+					if (z==0)
+						chromID = chrompair.second.first;
+				}
+				pos = SNPidx.size();
+				c1 = std::make_pair(chromID,pos);
+				SNPidx.clear();
+				SNPidx.resize(numSNP-pos);
+			
+				if(SNPidx.size() == 0){
+					//RecombCount++;
+					chrompair=CC[Pidx*numSNP];
+					chromID = chrompair.first.first;
+					c2 = std::make_pair(chromID, 0);
+				}
+				else{
+			
+					for (int z = 0; z < SNPidx.size(); z++){
+						chrompair = CC[Pidx*numSNP + pos+z];
+						haploids[pos+z] = chrompair.first.second;
+				
+						if (z==0)
+						chromID = chrompair.first.first;
+					}
+					pos = SNPidx.size();
+					c2 = make_pair(chromID,-pos);
+			//packs everything into contributing chromosome container indicating positions.
+					RecombCount++;
+				}	
+				//s = "";
+				//for (const auto &piece1 : haploids) s += piece1;
+			//	std::cout << std::endl << "haploids: " << s << std::endl;
+				ContributingChroms = std::make_pair(c1,c2);
+ 				MutBox = Mutate(haploids,MutationRate,L);
+				MutatedHaploids = MutBox.first.first; 
+				localmut = MutBox.first.second; 
+				chromname = AddandGetChromName(GenNum);
+				int snpid = MutBox.second;
+				toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb, snpid);
+				
+				haploids.clear();
+				haploids.resize(numSNP);
+				
+				SNPidx.clear();
+	
+		//Mutates the SNPs before passing them on to the child as described in the Mutate method
+			}
 	}
+	return toChild;
+}
 /*This is the method which executes whether there was a recombination or not, depending on the recombination rate fed by the user. This creates 4 equidistant
 bins and tosses a coin to decide whether it's crossover or not and whatever the result whether it comes from the father's strand or mother's strand of SNPs.
 Then it obtains the AlleleInfo container after invoking the aforementioned methods to get the haploids to the child and passes it on as a return value */
-AlleleInfo Individuals :: AskChromosome (int Pidx, vector<pair<pair<string,string>, pair<string,string> > > CC, vector<int> SNPlocs, double RecombRate, double 	MutationRate, int L, int GenNum){ 
-		int recomidx; 
+AlleleInfo Individuals :: AskChromosome (int Pidx, std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > CC, std::vector<int> SNPlocs, double rrate, double MutationRate, int L, int GenNum){ 
+		int recomidx; 	
 		//Coin Toss
-		double randrecom = ((double) rand()/(double) (RAND_MAX));
+		string s;
+		double randrecom = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
+		
 		//4 bins and seeing where the coin lands
-		if (randrecom > 0 && randrecom < ((1-RecombRate)/2)) recomidx = 1;
-		else if (randrecom >= ((1-RecombRate)/2) && randrecom < (1-RecombRate)) recomidx = 2;
-		else if (randrecom >= (1-RecombRate) && randrecom < (1-(RecombRate/2))) recomidx = 3;
-		else if (randrecom >= (1-(RecombRate/2)) && randrecom < 1) recomidx = 4; 
-			
+
+		double RecombRate = rrate*L;
+		//std::cout << std::endl << "RecombRate: " << RecombRate << std::endl;
 		//Depending on the bin where it landed it decides what to do and send the result to the child
 		AlleleInfo toChild;
-		switch(recomidx){
+
 	
-			case 1:  toChild = GetAllelesforChild(Pidx,CC,SNPlocs,MutationRate,GenNum,1); break;
-			case 2:  toChild = GetAllelesforChild(Pidx,CC,SNPlocs,MutationRate,GenNum,2); break;
-			case 3:  toChild = GetCrossOverAlleles(Pidx,CC,SNPlocs,MutationRate,L,GenNum,1); break;
-			case 4:  toChild = GetCrossOverAlleles(Pidx,CC,SNPlocs,MutationRate,L,GenNum,2); break;
-		}
+		if (randrecom >= 0 && randrecom < ((1-RecombRate)/2)) toChild = GetAllelesforChild(Pidx,CC,SNPlocs,MutationRate,L,GenNum,1);
+		else if (randrecom >= ((1-RecombRate)/2) && randrecom < (1-RecombRate)) toChild = GetAllelesforChild(Pidx,CC,SNPlocs,MutationRate,L,GenNum,2);
+		else if (randrecom >= (1-RecombRate) && randrecom < (1-(RecombRate/2))) toChild = GetCrossOverAlleles(Pidx,CC,SNPlocs,MutationRate,L,GenNum,1);
+		else if (randrecom >= (1-(RecombRate/2)) && randrecom < 1) toChild = GetCrossOverAlleles(Pidx,CC,SNPlocs,MutationRate,L,GenNum,2); 
 		return toChild; 
 	}
 	 

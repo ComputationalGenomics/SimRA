@@ -21,31 +21,32 @@ It contains the Chromsome IDs of each chromosomes and also the chromosome inform
 #include <stdexcept>
 #include<math.h>
 #include<limits>
+#include<gsl/gsl_rng.h>
 #include<map>
 #include "GlobalIndivs.h"
 #include "Events.h"
 #ifndef indivs
 #define indivs
-using namespace std;
+//using namespace std;
 
 class Individuals
 {
 	//These are private data structures as they are specific to each generation and no other generation can use them. 
 	private:
-		vector<pair<pair<string,string>, pair<string,string> > > ChromContainer;
-		vector<string> SNPlabels;
-		vector<string> ChromLabels; 
-		vector<pair<bool,pair<AlleleInfo,AlleleInfo> > > ParentInfoList; 
+		std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > ChromContainer;
+		std::vector<string> SNPlabels;
+		std::vector<string> ChromLabels; 
+		std::vector<std::pair<bool,std::pair<AlleleInfo,AlleleInfo> > > ParentInfoList; 
 	//All the method used to populate the above data structures are declared public as they are the standard way to get these information
 	public:
 		Individuals()
 		{}
 		//This method reserves space for the chromosome containers
 		void ReserveSpace(int x);
-		//Adding Pairs to the Chromosome Containers
-		void Addpairs(pair<pair<string,string>,pair<string,string> > x); 
+		//Adding std::pairs to the Chromosome Containers
+		void Addpairs(std::pair<std::pair<string,string>,std::pair<string,string> > x, int y); 
 		//This just fetches and returns the Chromosome Container
-		vector<pair<pair<string,string>, pair<string,string> > > getChromContainer();
+		std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > getChromContainer();
 		//This is a destructor for ChromContainer
 		void DestroyCC ();
 		//Displays the content of the chromcontainer
@@ -57,27 +58,27 @@ class Individuals
 		//Displaying the Chromosome and SNP labels
 		void DisplayLabels();
 		//This gets the location segment of each SNP inside the length of the chromosome
-		vector<int> GetLocSegment(int x,int y); 
+		std::vector<int> GetLocSegment(int x,int y); 
 		//This fetches the fitness table for a particular generation and the fitness table remains constant throughout the simulation
-		double *getFitnessTable(int x);	
+		double *getFitnessTable(int x, double y, double z);	
 		//This is for displaying the fitness table (for debugging purposes)
 		void DisplayTable(double* x, int y);
 		//This gets the position of the allele from the fitness table with it's respective fitness value
-		int getPosAllele(vector<string> x);
+		int getPosAllele(std::vector<string> x);
 		//This pushes the parent chromosome info for each individual in the last generation
-		void PushToList(pair<bool, pair <AlleleInfo,AlleleInfo> > x);
+		void PushToList(std::pair<bool, std::pair <AlleleInfo,AlleleInfo> > x);
 		//Displaying the List of Parents for each individual in a given generation (not relevant)
 		void DisplayParentList(); 
 		//This method mutates the SNPs according to mutation rate
-		pair<vector<string>, vector<pair<string,int> > > Mutate(vector<string> x,double y);
+		std::pair<std::pair<std::vector<string>, int >, int> Mutate(std::vector<string> x,double y, int L);
 		//This fetches the List element containing parent chromosome info for each individual in the last generation
-		pair<bool,pair<AlleleInfo,AlleleInfo> > RetrieveListElement(int);
+		//std::pair<bool,std::pair<AlleleInfo,AlleleInfo> > RetrieveListElement(int);
 		//This method gets alleles for the child, when there's no crossover
-		AlleleInfo GetAllelesforChild(int x, vector<pair<pair<string,string>, pair<string,string> > > CC, vector<int> SNPlocs, double MutationRate, int GenNum, int chromnum);
+		AlleleInfo GetAllelesforChild(int x, std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > CC, std::vector<int> SNPlocs, double MutationRate, int L, int GenNum, int chromnum);
 		//This method gets alleles for the child, when there's a crossover 
-		AlleleInfo GetCrossOverAlleles(int Pidx, vector<pair<pair<string,string>, pair<string,string> > > CC, vector<int> SNPlocs, double MutationRate, int L, int GenNum, int chromnum);
+		AlleleInfo GetCrossOverAlleles(int Pidx, std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > CC, std::vector<int> SNPlocs, double MutationRate, int L, int GenNum, int chromnum);
 		//This method is invoked when the child asks for chromosome from it's parents and depending on the crossover result either of the above two methods is invoked.
-		AlleleInfo AskChromosome (int Pidx, vector<pair<pair<string,string>, pair<string,string> > > CC, vector<int> SNPlocs, double RecombRate, double MutationRate, int L, int GenNum);
+		AlleleInfo AskChromosome (int Pidx, std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > CC, std::vector<int> SNPlocs, double RecombRate, double MutationRate, int L, int GenNum);
 };
 
 #endif

@@ -22,14 +22,15 @@ It also keeps a track of all the children it contributed to and the amount of co
 #ifndef CHRINFO_H
 #define CHRINFO_H
 
-using namespace std;
+//using namespace std;
 
 struct ChromosomeInfo{
+	
 	pair<pair<string,int>,pair<string,int> > Parentchroms; 
-	int CreatingParentID; 
-	bool ParentSex; 
-	pair<bool, pair<int,int> > MyLocation;
-	vector<pair<pair<int,bool>, pair<string,int> > > AllChildrenInfo; //This is a vector of of pairs, recording the location, gender and the 
+	//int CreatingParentID; 
+	//bool ParentSex; 
+	//pair<bool, pair<int,int> > MyLocation;
+	//vector<pair<pair<int,bool>, pair<string,int> > > AllChildrenInfo; //This is a vector of of pairs, recording the location, gender and the 
 																	 //children chromosomes in the next generation and what it contributed to
 };
 

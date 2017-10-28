@@ -12,45 +12,86 @@ This is a class where each all variables which is used globally and which doesn'
 #include<stdio.h>
 #include<cstdlib>
 #include<math.h>
+#include<omp.h>
+#include<map>
+#include<time.h>
+#include<random>
+#include<set>
 #include<cmath>
+#include<gsl/gsl_rng.h>
 #include "GlobalIndivs.h"
 #include "ChrInfo.h"
 #include "Events.h"
-#define FITNESS_MAX 0.001
-#define FITNESS_MIN -0.001
 
-using namespace std; 
+
+//using namespace std; 
 //This array is the definition of the diploids, with which we start
 string diploids[] = {"AA", "AC", "AG", "AT", "CC", "CG", "CT", "GG", "GT", "TT"};
-//converting them to a vector 
-vector<string> diploidVec(diploids,diploids+10);
+//converting them to a std::vector 
+std::vector<string> diploidVec(diploids,diploids+10);
 //this is for naming the SNPs
 string rsid = "rs";
 //Declaring the bases array
 string bases[] = {"A","T","G","C"};
-//Converting the bases array to a vector
-vector<string> baseVec(bases,bases+4); 
+//Converting the bases array to a std::vector
+std::vector<string> baseVec(bases,bases+4); 
 int diploidSize = diploidVec.size();
+//gsl_rng ** threadvec = new gsl_rng*[omp_get_num_threads()];
+gsl_rng** threadvec = new gsl_rng*[omp_get_max_threads()];
 //This is for naming the chromosomes 
 string chromid = "chrom";
-//This map stores the key-value pairs of the chromosome ID followed by their information of past-present-future
-map <string, ChromosomeInfo> AllChromRecords;
+//This std::map stores the key-value std::pairs of the chromosome ID followed by their information of past-present-future
+//std::map <string, ChromosomeInfo> AllChromRecords;
+int NUMRUN = 100;
+int RecombCount = 0;
+int MutCount = 0; 
+double FITNESS;
+int flag = 0;
+int flagmut = 0;
+int SelectedSNPID = -1; 
+std::map<int, std::vector<std::pair<std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > >, std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > > > >  AllChromRecords;
+std::map< int, std::vector<std::pair<std::pair<string,std::vector<string> >, std::pair<string,std::vector<string> > > > > AllHapRecords;
+std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > > MutMap;
+std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > > RecombMap;
+void InitializeThread(){
+	
+	gsl_rng_env_setup();		
+	for (int b = 0; b < omp_get_max_threads(); b++){
+		threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
+		gsl_rng_set(threadvec[b],b*clock());
+	}
+	
+	std::cout << "number of threads : " << omp_get_max_threads() << std::endl;
+	
+}
+void FreeThread(){
+		for (int b = 0; b < omp_get_max_threads(); b++)
+			gsl_rng_free(threadvec[b]);
+		
+		//free(threadvec);
+		delete[] threadvec; 
+}
+double RandU(double min, double max) {
+    thread_local std::mt19937 generator(std::random_device{}());
+    std::uniform_real_distribution<double> distribution(min, max);
+    return distribution(generator);
+}		
 double  doubleRand(double min, double max) {
         double val = (double)rand()/RAND_MAX;
         return min + val*(max-min);
 }
 
-double  ComputeProduct(vector<double> values){
+double  ComputeProduct(std::vector<double> values){
 	double mult = 1.0; 
-	for (vector<double>::iterator it = values.begin(); it != values.end(); ++it)
+	for (std::vector<double>::iterator it = values.begin(); it != values.end(); ++it)
 		mult = mult*(*it);
 		
 	return mult; 
 }
 
-double  ComputeSum(vector<double> values){
+double  ComputeSum(std::vector<double> values){
         double sum = 0.0;
-        for (vector<double>::iterator it = values.begin(); it != values.end(); ++it)
+        for (std::vector<double>::iterator it = values.begin(); it != values.end(); ++it)
                 sum = sum+(*it);
         return sum;
 }
@@ -65,14 +106,134 @@ bool IsInteger(float k)
         return false;
     }
 
-vector<string>  GetPairs(int n, vector<pair<pair<string,string>, pair<string,string> > > CC){
+double Dcalc(double x){
+	 return x*x;
+	}
+	
+double GetDiversity(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID){
+	std::vector<string> SelectedSNPs(ChromID.size()); 
+	std::string allHaps = "";
+	for (int bb = 0; bb < ChromID.size(); bb++){
+			string SelChrID = ChromID[bb];
+			for (std::vector<std::pair<string,std::vector<string> > >::iterator it1 = Haps.begin(); it1 != Haps.end(); ++it1){
+				if (SelChrID.compare(it1->first) == 0){
+					string strhaps = "";
+					std::vector<string> tmphaps = it1->second; 
+					for (int z = 0; z < tmphaps.size(); z++)
+							strhaps += tmphaps[z];
+						//std::cout << std::endl << strhaps << std::endl;
+					SelectedSNPs[bb] = strhaps;
+					tmphaps.clear();
+				}else
+					continue;
+			}
+		allHaps += SelectedSNPs[bb]; 
+		//std::cout << std::endl << "Selected SNP was: " << SelectedSNPs[bb] << std::endl;
+
+	}
+	
+	//for (int i = 0; ChromID.size(); i++)
+		//allHaps += SelectedSNPs[i];
+
+	double accu = 0;
+	for (int i = 0; i < allHaps.size(); i++){
+		double n = std::count(allHaps.begin(), allHaps.end(), allHaps[i]);
+		double ct = n/allHaps.size();
+		accu += ((ct/allHaps.size())*(1-(ct/allHaps.size())));
+	}
+	//double normacc = (accu)/allHaps.size();
+	return accu;
+	//std::cout << std::endl << "Projapoti Biscuit: " << normacc << std::endl;
+}
+std::vector<double> GetL (std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID){
+	std::vector<string> SelectedSNPs(ChromID.size()); 
+	for (int bb = 0; bb < ChromID.size(); bb++){
+			string SelChrID = ChromID[bb];
+			for (std::vector<std::pair<string,std::vector<string> > >::iterator it1 = Haps.begin(); it1 != Haps.end(); ++it1){
+				if (SelChrID.compare(it1->first) == 0){
+					string strhaps = "";
+					std::vector<string> tmphaps = it1->second; 
+					for (int z = 0; z < tmphaps.size(); z++)
+							strhaps += tmphaps[z];
+						//std::cout << std::endl << strhaps << std::endl;
+					SelectedSNPs[bb] = strhaps;
+					tmphaps.clear();
+				}else
+					continue;
+			}
+	}
+	//if ( flag == 1 ){
+	//for (int ib = 0; ib < SelectedSNPs.size(); ib++){
+	//	std::cout << "vector Element: " << ib << " is " << SelectedSNPs[ib] << std::endl;
+	//}
+	//}
+	std::vector<string> ualvec;
+	std::set<string> uals(SelectedSNPs.begin(),SelectedSNPs.end());
+	ualvec.assign(uals.begin(),uals.end());
+	std::vector<double> ExtCount;
+	for(std::vector<string>::iterator ii = ualvec.begin(); ii != ualvec.end(); ++ii){
+		double myc = std::count(SelectedSNPs.begin(),SelectedSNPs.end(),*ii);
+		ExtCount.push_back(myc);
+	}
+	return ExtCount;
+}
+std::vector <double> GetLineages(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID){
+	std::vector<string> SelectedSNPs; 
+	for (std::vector<string>::iterator it = ChromID.begin(); it != ChromID.end(); ++it){
+				string SelChrID = *it;
+				for (std::vector<std::pair<string,std::vector<string> > >::iterator it1 = Haps.begin(); it1 != Haps.end(); ++it1){
+				if (SelChrID.compare(it1->first) == 0){
+						string strhaps = "";
+						std::vector<string> tmphaps = it1->second; 
+						for (int z = 0; z < tmphaps.size(); z++)
+								strhaps += tmphaps[z];
+						//std::cout << std::endl << strhaps << std::endl;
+						SelectedSNPs.push_back(strhaps);
+						tmphaps.clear();
+				}else
+						continue;
+				}
+			}
+	std::vector<double> ExtCount;
+	std::vector<string> AlreadySeen;
+	std::vector<string> ualvec;
+	std::vector<string>  SelSNPs = SelectedSNPs;
+	for (int ii = 0; ii < SelSNPs.size(); ++ii){
+	//	std::cout << "std::vector Element: " << ii << " is " << SelectedSNPs[ii] << std::endl; 
+		int lincount = 1;
+		if(find(ualvec.begin(),ualvec.end(),SelectedSNPs[ii]) == ualvec.end()){
+			for (int jj = ii+1; jj < SelectedSNPs.size(); ++jj){
+				if(SelectedSNPs[jj].compare(SelSNPs[ii]) == 0){
+					lincount++;
+					AlreadySeen.push_back(SelSNPs[ii]);
+				}
+				else
+					continue;
+			}
+		}
+		else
+			continue;
+		std::set <string> uals(AlreadySeen.begin(),AlreadySeen.end());
+		ualvec.assign(uals.begin(),uals.end());
+		ExtCount.push_back(lincount);
+	}
+	return ExtCount;
+}
+double GetExpTime(double NL, int popSize){
+	return (4*popSize)*(1 - (1/NL));
+}
+std::vector<string>  Getpairs(int n, std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > CC){
 			
-	pair<pair<string,string>, pair<string,string> > chrompair = CC[n];
-	vector<string> EachPair;
+	std::pair<std::pair<string,string>, std::pair<string,string> > chrompair = CC[n];
+	std::vector<string> Eachpair;
 		
-	EachPair.push_back(chrompair.first.first);
-	EachPair.push_back(chrompair.first.second);
-	EachPair.push_back(chrompair.second.first);
-	EachPair.push_back(chrompair.second.second);
-	return EachPair;
+	Eachpair.push_back(chrompair.first.first);
+	Eachpair.push_back(chrompair.first.second);
+	Eachpair.push_back(chrompair.second.first);
+	Eachpair.push_back(chrompair.second.second);
+	return Eachpair;
+}
+
+string firstElement( const std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > &p ) {
+    return p.first;
 }
