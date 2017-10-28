@@ -40,7 +40,7 @@ If you want to vary different m's, please edit the header of the MainSSimRA.cpp 
 We welcome contributions but request that you follow the guidelines indicated [here](https://github.com/ComputationalGenomics/SimRA/blob/master/Contributing/Contributing.md).
 
 # Apache License v. 2.0
-Copyright 2015 IBM Corporation
+Copyright 207 IBM Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
