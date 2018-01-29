@@ -69,8 +69,9 @@ class Individuals
 		void PushToList(std::pair<bool, std::pair <AlleleInfo,AlleleInfo> > x);
 		//Displaying the List of Parents for each individual in a given generation (not relevant)
 		void DisplayParentList(); 
+		void FitnessON(int x);
 		//This method mutates the SNPs according to mutation rate
-		std::pair<std::pair<std::vector<string>, int >, int> Mutate(std::vector<string> x,double y, int L);
+		std::pair<std::vector<string>, int > Mutate(std::vector<string> x,double y, int L);
 		//This fetches the List element containing parent chromosome info for each individual in the last generation
 		//std::pair<bool,std::pair<AlleleInfo,AlleleInfo> > RetrieveListElement(int);
 		//This method gets alleles for the child, when there's no crossover

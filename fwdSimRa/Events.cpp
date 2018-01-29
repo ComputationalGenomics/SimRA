@@ -22,7 +22,7 @@ It also keeps a track of the state before Mutation and also after mutation, the 
 
 //using namespace std; 
 //It gets the input from the crossover method in the Individuals.h and send populates the structure
-AlleleInfo Events :: getandPopulateStruct(int pos, int pid, string chromname, std::pair<std::pair<string,int>,std::pair<string,int> > ContChrom, std::vector<string> haploids, int localmut, int localrecomb, int snpid){
+AlleleInfo Events :: getandPopulateStruct(int pos, int pid, string chromname, std::pair<std::pair<string,int>,std::pair<string,int> > ContChrom, std::vector<string> haploids, int localmut, int localrecomb){
 	
 	AlleleInfo access;
 	access.position = pos;
@@ -32,7 +32,6 @@ AlleleInfo Events :: getandPopulateStruct(int pos, int pid, string chromname, st
 	access.RecombCount = localrecomb;
 	std::pair <string, std::vector<string> > chrompair = std::make_pair(chromname,haploids);
 	access.ToTheChild = chrompair; 
-	access.snpid = snpid;
 	return access; 
 }
 

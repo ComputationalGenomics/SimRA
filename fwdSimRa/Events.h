@@ -31,7 +31,6 @@ struct AlleleInfo{
 			int MutCount;
 			int RecombCount; 
 			pair <string,vector<string> >  ToTheChild; 
-			int snpid;
 		};
 		
 class Events{ 
@@ -40,7 +39,7 @@ class Events{
 		//this is an object to access the structure AlleleInfo
 		AlleleInfo access;
 		//this method returns a structure of AlleleInfo with populating all the fields of the structure
-		AlleleInfo getandPopulateStruct(int pos, int pid, string chromname, pair<pair<string,int>,pair<string,int> > ContChrom, vector<string> haploids, int localmut, int localrecomb, int snpid);
+		AlleleInfo getandPopulateStruct(int pos, int pid, string chromname, pair<pair<string,int>,pair<string,int> > ContChrom, vector<string> haploids, int localmut, int localrecomb);
 		
 		
 

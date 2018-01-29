@@ -38,15 +38,17 @@ std::vector<string> baseVec(bases,bases+4);
 int diploidSize = diploidVec.size();
 //gsl_rng ** threadvec = new gsl_rng*[omp_get_num_threads()];
 gsl_rng** threadvec = new gsl_rng*[omp_get_max_threads()];
+double *PopulationFitnessTable = new double[numberofSNPs*diploidSize];
 //This is for naming the chromosomes 
 string chromid = "chrom";
 //This std::map stores the key-value std::pairs of the chromosome ID followed by their information of past-present-future
 //std::map <string, ChromosomeInfo> AllChromRecords;
-int NUMRUN = 100;
+int NUMRUN = 10;
 int RecombCount = 0;
 int MutCount = 0; 
 double FITNESS;
 int flag = 0;
+int numberofSNPs; 
 int flagmut = 0;
 int SelectedSNPID = -1; 
 std::map<int, std::vector<std::pair<std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > >, std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > > > >  AllChromRecords;

@@ -1,4 +1,4 @@
-/*
+	/*
 
 SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
@@ -42,7 +42,7 @@ double FITNESS_MAX;
 double FITNESS_MIN;
 std::vector <std::pair<string,int> > UpdatedChroms;
 //std::vector<int> ArgPop {20,50,80,120};
-std::vector<int> ArgPop {4,6,8,10};
+std::vector<int> ArgPop {8,8,8,8};
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
 		std::cerr << "Chromosome Length should be an integer greater than 1" << std::endl; 
 	}
 		
-	int numberofSNPs = GenNum*MutationRate*ChromLen;
-	//int numberofSNPs = 30; 
+	//int numberofSNPs = GenNum*MutationRate*ChromLen;
+	numberofSNPs = 30; 
 	std::cout << std::endl << "Number of SNPs being used is: " << numberofSNPs << std::endl; 
 
  
@@ -124,6 +124,8 @@ int main(int argc, char *argv[])
 	typedef std::map< int, std::vector<std::pair<std::pair<string,std::vector<string> >, std::pair<string,std::vector<string> > > > >::iterator HapIterator;
 	typedef std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > >::iterator MutMapIterator;
 	typedef std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > >::iterator RecombMapIterator;
+	string fileName = "p1.txt";
+	std::ofstream mf1(fileName);
 	
 	//The Parent ID for the base generation is defined to be -1, to get rid of ambiguations
 	int Pid = -1;
@@ -180,9 +182,22 @@ int main(int argc, char *argv[])
 	
 	//We get the fitness tables. This will remain constant throughout the analysis. If we need a new fitness table every generation, that 
 	//is an easy fix.
-	double *PopulationFitnessTable = NewGenMale[0].getFitnessTable(numberofSNPs, FITNESS_MAX, FITNESS_MIN);
+	//double *PopulationFitnessTable = NewGenMale[0].getFitnessTable(numberofSNPs, FITNESS_MAX, FITNESS_MIN);
+	/*for (int i = 0; i < numberofSNPs*diploidSize; i++)
+		*((double*)PopulationFitnessTable + i) = 0.0;*/
+	std::fill_n(PopulationFitnessTable,diploidSize*numberofSNPs, 0.0);
 
+	int baseSNP = rand()%numberofSNPs;
+	int randindiv = RandU(0,popSize*2);
+	//This commented out piece of code is just for printing the chromosome containers and for debugging purposes.
+	for (int i = 0; i < numberofSNPs; i++){	
+		for (int j = 0; j < diploidSize; j++){
+				std::cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
+			}
+			std::cout << std::endl;
+		}
 	omp_set_dynamic(0);
+	//std::cout << std::endl << "Hello there" << std::endl;
 	int snpmutflag = 0;
 
 	 clock_t b2 = omp_get_wtime();
@@ -238,6 +253,7 @@ int main(int argc, char *argv[])
 		}
 		double sumprobs_F = ComputeSum(StoreProductFitness_F);
 		double sumprobs_M = ComputeSum(StoreProductFitness_M);
+		
 		//std::cout << std::endl << "Sumprobs Female is " << sumprobs_F << " and Sumprobs Male is " << sumprobs_M << std::endl; 
 		for (std::vector<double>::iterator it = StoreProductFitness_F.begin(); it != StoreProductFitness_F.end(); ++it){
 			//std::cout << *it << " | " ;
@@ -252,8 +268,16 @@ int main(int argc, char *argv[])
 		//std::cout << std::endl << "Size of indivprobs_M: " << indivprobs_F.size() << std::endl; 
 		std::vector<double>oldindivprobs_M(indivprobs_M);
 		std::vector<double>oldindivprobs_F(indivprobs_F);
-		//std::cout << std::endl; 
-		//std::cout << "====================================================";
+		
+		if(mf1.is_open()){
+			for (int x = 0; x < indivprobs_F.size(); x++)
+				mf1 << indivprobs_F[x] << "\t";
+			mf1 << std::endl;
+		}
+				else cout << "Unable to open file";
+
+		std::cout << std::endl; 
+		std::cout << "====================================================";
 	
 		
 		transform(indivprobs_M.begin(), indivprobs_M.end(), indivprobs_M.begin(), computeSquare);	
@@ -269,7 +293,7 @@ int main(int argc, char *argv[])
 		std::vector<std::pair<std::pair<string,std::vector<string> >, std::pair<string,std::vector<string> > > > ExtantHaploids(popSize*2);
 		std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > ChrMutInfo(popSize*2);
 		std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > ChrRecombInfo(popSize*2);
-		std::vector<pair<int,int> > SNPid(popSize*2);
+		//std::vector<pair<int,int> > SNPid(popSize*2);
 		Vecofpairs AllChromVec(popSize*2);
 		//Selecting parent IDs for each individual and getting chromosome and crossover information from each parent 
 		
@@ -329,7 +353,7 @@ int main(int argc, char *argv[])
 			//clock_t e4 = omp_get_wtime();
 			//gettimeofday(&tp, NULL);
 			//std::cout << std::endl << "SNPid was " << fromFather.snpid << " and " << fromMother.snpid << std::endl; 
-			SNPid[i] = std::make_pair(fromFather.snpid,fromMother.snpid); 
+			//SNPid[i] = std::make_pair(fromFather.snpid,fromMother.snpid); 
 			haploids_M = fromFather.ToTheChild.second;
 			haploids_F = fromMother.ToTheChild.second;
 			chromid_F =  fromMother.ToTheChild.first;
@@ -358,44 +382,8 @@ int main(int argc, char *argv[])
 			haploids_M.clear();
 		}
 		
-		if (snpmutflag == 0){
-			for (int ll = 0; ll < popSize*2; ll++){
-				std::pair<int,int> idp = SNPid[ll]; 
-				if (idp.first > 0){
-					for (int mm = 0; mm < diploidSize ; mm++){ 
-					std::string targetdiploid = diploidVec[mm];
-					std::size_t ct = std::count(targetdiploid.begin(),targetdiploid.end(),'T');
-					if (ct == 2)
-						PopulationFitnessTable[idp.first*diploidSize+mm] = 2*FITNESS;
-					else if (ct == 1)
-						PopulationFitnessTable[idp.first*diploidSize+mm] = FITNESS; 
-					else 
-						PopulationFitnessTable[idp.first*diploidSize+mm] = 0;	
-					}
-					SelectedSNPID = -1; 
-					snpmutflag = 1;
-					break;
-				}
-				if (idp.second > 0){
-					for (int mm = 0; mm < diploidSize ; mm++){ 
-					std::string targetdiploid = diploidVec[mm];
-					std::size_t ct = std::count(targetdiploid.begin(),targetdiploid.end(),'T');
-					if (ct == 2)
-						PopulationFitnessTable[idp.second*diploidSize+mm] = 2*FITNESS;
-					else if (ct == 1)
-						PopulationFitnessTable[idp.second*diploidSize+mm] = FITNESS; 
-					else 
-						PopulationFitnessTable[idp.second*diploidSize+mm] = 0;	
-					}
-					SelectedSNPID = -1; 
-					snpmutflag = 1;
-					break;
-				}
-			}
-		}
-		
-		std::cout<<std::endl;
-		SNPid.clear();
+		//std::cout<<std::endl;
+		//SNPid.clear();
 		M_ChromContainer.clear();
 		F_ChromContainer.clear();
 		M_ChromContainer.resize(numberofSNPs*popSize);
@@ -420,6 +408,7 @@ int main(int argc, char *argv[])
 		std::cout << std::endl << "Time taken to compute Generation # " << g << " is " << et2 << " secs" << std::endl; 
 	
 	}
+	mf1.close();
 	clock_t e2 = omp_get_wtime();
 	FreeThread();
 
@@ -434,7 +423,7 @@ int main(int argc, char *argv[])
 	std::string reco = std::to_string(RecombRate);
 	std::string mutu = std::to_string(MutationRate);
 	std::string fit = std::to_string(FITNESS); 
-
+	
 	for (int cd = 0; cd < ArgPop.size(); cd++){
 		//std::cout << std::endl << "****** Starting Simulation " << ab << "******" << std::endl;
 		vector<double> Div(NUMRUN);
@@ -443,17 +432,26 @@ int main(int argc, char *argv[])
 		vector<int> HT(NUMRUN);
 		vector<double> TtoG(NUMRUN);
 		std::vector<double> ExtCount;
+		
 		std::string strARGpop = std::to_string(ArgPop[cd]);
-		string FName = "N"+strPop+"_g"+strChrLen+"r_"+reco+"mu_"+mutu+"_sel"+"_m"+strARGpop+"fit_"+fit+".txt"; 
+		std::string strcd = std::to_string(cd);
+		
+		string FName = "N"+strPop+"_g"+strChrLen+"r_"+reco+"mu_"+mutu+"_sel"+"_m_"+strARGpop+"fit_"+fit+"_"+strcd+".txt"; 
 		HapIterator iter;
 		double NumLineages;
 		
+			
+
 		std::vector<std::pair<std::pair<string,std::vector<string> > , std::pair<string,std::vector<string> > > > ExtantHaps(popSize*2);
 		std::vector<std::pair<string,std::vector<string> > > haploo;
 		for (int ab = 0; ab < NUMRUN; ab++){
 			int ArgRecomb = 0;
 			int ArgMut = 0;
-			int ht=0; 		
+			int ht=0; 
+			std::string strab = std::to_string(ab);
+			string opf1 = "ARGtrace_"+strARGpop+"_"+strcd+"_"+strab+".txt";	
+			std::ofstream mf2(opf1);	
+			mf2 << "digraph G{" << std::endl << "size = \"7.5,5\" ;" << std::endl << "ratio = \"fill\";" << std::endl << "labelloc = \"t\" ;" << std::endl << "compound=true;" << std::endl << "newrank=true;" << std::endl << std::endl; 
 			iter = AllHapRecords.find(GenNum-1);
 			ExtantHaps = iter->second; 
 			//std::vector <double> TimeVec;
@@ -502,47 +500,75 @@ int main(int argc, char *argv[])
 			
 			std::vector<string> ChromIds;
 			std::vector<string> ExtantChromIDs;
-			double rnd;
+			double rnd; 
 					
 			for (std::vector<std::pair<ChromInfo,ChromInfo> >::iterator it = SelectedChroms.begin(); it != SelectedChroms.end(); ++it){
 				rnd = ((double) rand()/(double) (RAND_MAX));
 				if (rnd <= 0.5){
 					ExtantChromIDs.push_back(it->first.first);
+					
 					if(it->first.second.first.second != 0){
 						if (it->first.second.first.second != numberofSNPs)
 							ArgRecomb++;
 						ChromIds.push_back(it->first.second.first.first);
+						if(mf2.is_open())
+							mf2 << it->first.first << " -> " << it->first.second.first.first << std::endl;
+						else cout << "Unable to open file";
 					}
 					if(it->first.second.second.second != 0){
 						if(it->first.second.second.second != numberofSNPs)
 							ArgRecomb++;
 						ChromIds.push_back(it->first.second.second.first);	
+						if(mf2.is_open())
+							mf2 << it->first.first << " -> " << it->first.second.second.first << std::endl;
+						else cout << "Unable to open file";
 					}
+					if(mf2.is_open())
+						mf2 << std::endl;
+					else cout << "Unable to open file";	
+					
 				}
 				else {
 					ExtantChromIDs.push_back(it->second.first);
 					if(it->second.second.first.second != 0){
 						if (it->second.second.first.second != numberofSNPs)
 							ArgRecomb++;
-						ChromIds.push_back(it->second.second.first.first);	
+						ChromIds.push_back(it->second.second.first.first);
+						if(mf2.is_open())
+							mf2 << it->second.first << " -> " << it->second.second.first.first << std::endl;
+						else cout << "Unable to open file";
 					}
 					if(it->second.second.second.second != 0){
 						if (it->second.second.second.second != numberofSNPs)
 							ArgRecomb++;
-						ChromIds.push_back(it->second.second.second.first);	
+						ChromIds.push_back(it->second.second.second.first);
+						if(mf2.is_open())
+							mf2 << it->second.first << " -> " << it->second.second.first.first << std::endl;
+						else cout << "Unable to open file";
 					}
+					if(mf2.is_open())
+						mf2 << std::endl;
+						
+					else cout << "Unable to open file";	
 				}
 			}
-			
+			mf2 << "{rank = same; ";
 			for (std::vector<string>::iterator it = ExtantChromIDs.begin(); it != ExtantChromIDs.end(); ++it){
 				string SelChrID = *it;
 				//std::cout << std::endl << "Selected Chromosome IDs are: " << SelChrID << std::endl;
 				for (std::vector<std::pair<string,int> >::iterator it1 = MC.begin(); it1 != MC.end(); ++it1){
 					if (SelChrID.compare(it1->first) == 0)
 						ArgMut += it1->second;
-				}
-		
+				} 
+				if(mf2.is_open())
+					mf2 << *it << "; "; 
 			}
+			mf2 << "}" << std::endl << std::endl << "{rank = same; "; 
+			for (std::vector<string>::iterator it1 = ChromIds.begin(); it1 != ChromIds.end(); ++it1){
+				if(mf2.is_open())
+					mf2 << *it1 << "; "; 
+			}
+			mf2 << "}" << std::endl << std::endl; 
 			
 			double D = GetDiversity(haploo, ExtantChromIDs);
 
@@ -601,32 +627,45 @@ int main(int argc, char *argv[])
 							if (NewLeafVec[fidx].second.first.second != 0){
 								if(NewLeafVec[fidx].second.first.second != numberofSNPs)
 									ArgRecomb++;
+								if(mf2.is_open())
+									mf2 << ChromIds[k] << " -> " << NewLeafVec[fidx].second.first.first << std::endl;
+								else cout << "Unable to open file";
 								//std::cout << std::endl << NewLeafVec[fidx].second.first.second << std::endl;
 								NewChromIds.push_back(NewLeafVec[fidx].second.first.first);
 								for (std::vector<std::pair<string,int> >::iterator it1 = MC.begin(); it1 != MC.end(); ++it1){
 									if ((NewLeafVec[fidx].second.first.first).compare(it1->first) == 0)
 										ArgMut += it1->second;
-								}
-															
+								}								
 							}
 							if(NewLeafVec[fidx].second.second.second != 0){
 								if(NewLeafVec[fidx].second.second.second != numberofSNPs)
 									ArgRecomb++;
+								if(mf2.is_open())
+									mf2 << ChromIds[k] << " -> " << NewLeafVec[fidx].second.second.first << std::endl;
+								else cout << "Unable to open file";
 								//std::cout << std::endl << NewLeafVec[fidx].second.second.second << std::endl;
 								NewChromIds.push_back(NewLeafVec[fidx].second.second.first);
-								for (std::vector<std::pair<string,int> >::iterator it1 = MC.begin(); it1 != MC.end(); ++it1){
-									if ((NewLeafVec[fidx].second.second.first).compare(it1->first) == 0)
-										ArgMut += it1->second;
-								}
-						
-						}
+								for (std::vector<std::pair<string,int> >::iterator it2 = MC.begin(); it2 != MC.end(); ++it2){
+									if ((NewLeafVec[fidx].second.second.first).compare(it2->first) == 0)
+										ArgMut += it2->second;
+								}	
+							}
 					}
+					/*mf2 << "{rank = same; ";
+					for (int k = 0; k < ChromIds.size();k++)
+						mf2 << ChromIds[k] << "; ";
 					
+					mf2 << "}" << std::endl << "{rank = same; ";*/
+					 
 					ChromIds.clear();
 					std::set <string> Chrset(NewChromIds.begin(),NewChromIds.end());
 					NewChromIds.clear();
 					ChromIds.assign(Chrset.begin(),Chrset.end());
+					mf2 << "{rank = same; ";
+					for (std::vector<string>::iterator iks = ChromIds.begin(); iks != ChromIds.end(); ++iks)
+						mf2 << *iks << "; ";
 					
+					mf2 << "}" << std::endl << std::endl;
 					FirstChrIds.clear();
 					//std::cout << ChromIds.size() << std::endl;
 					if(ChromIds.size() > 1){
@@ -637,6 +676,7 @@ int main(int argc, char *argv[])
 						ht = (GenNum-g+1);
 						flag = 1; 
 						break;
+						//continue;
 					}	
 				haploo.clear();
 				ExtCount.clear();
@@ -662,8 +702,10 @@ int main(int argc, char *argv[])
 			Mut[ab] = ArgMut;
 			HT[ab] = ht;
 			TtoG[ab] = (double)ht/(4*popSize);
+			mf2 << std::endl << "}" << std::endl; 
+			mf2.close();
 		}
-	
+		
 		std::ofstream myfile1(FName);
 		if(myfile1.is_open()){
 			myfile1 << "ARG Height" << "\t" << "# of Recombinations" << "\t" << "# of Mutations" << "\t" << "Time to GMRCA" << "\t" << "Diversity" << std::endl;

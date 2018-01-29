@@ -86,20 +86,23 @@ std::vector<int> Individuals :: GetLocSegment(int NumberofSNPs,int L){
 	std::vector<int> ChromSegLoc(NumberofSNPs);
 	int uniqueflag;
 	int randloc;
+	srand(time(0));
 	int *RandNumbers = new int[L];
 	int *SelRandNum = new int [NumberofSNPs];
 	for (int z = 0; z < L; z++) 
 		RandNumbers[z] = z; 
-	
-	gsl_ran_shuffle(threadvec[omp_get_thread_num()],RandNumbers, L, sizeof (int));
+	std::vector<int> Rndnums(RandNumbers,RandNumbers+L);
+	 //std::cout << std::endl << "before shuffle!" << std::endl;
+	//gsl_ran_shuffle(threadvec[omp_get_thread_num()],RandNumbers, L, sizeof (int));
+	std::random_shuffle(Rndnums.begin(),Rndnums.end());
 	//gsl_ran_choose(threadvec[omp_get_thread_num()],SelRandNum, NumberofSNPs, RandNumbers, L, sizeof (int));
 	for(int z = 0; z < NumberofSNPs; z++)
-		ChromSegLoc[z] = RandNumbers[z];
+		ChromSegLoc[z] = Rndnums[z];
 	return ChromSegLoc; 
 	}
 
 //This defines and fetches the fitness table for each individual and this remains constant throughout the simulation	
-double* Individuals :: getFitnessTable(int NumberofSNPs, double FITNESS_MAX, double FITNESS_MIN){	
+/*double* Individuals :: getFitnessTable(int NumberofSNPs, double FITNESS_MAX, double FITNESS_MIN){	
 	double *PopulationFitnessTable = new double[NumberofSNPs*diploidSize];	
 	std::cout << std::endl << "Fitness MAX is " << FITNESS_MAX << " and " << "Fitness MIN is " << FITNESS_MIN << std::endl;
 	for ( int i = 0; i <  NumberofSNPs; i++ ){
@@ -116,9 +119,34 @@ double* Individuals :: getFitnessTable(int NumberofSNPs, double FITNESS_MAX, dou
 				 
 	return PopulationFitnessTable;			
 	}
-
+*/
+void Individuals::FitnessON(int SelectedSNPID){
+	//double *PopulationFitnessTable = new double[numberofSNPs*diploidSize];	
+	std::cout << std::endl << "Putting Fitness ON" << std::endl;
+	/*for ( int i = 0; i <  numberofSNPs; i++ ){
+		for (int j = 0; j < diploidSize ; j++){ 
+			PopulationFitnessTable[i*diploidSize + j] = 0;	
+		}
+	}*/
+	for (int j = 0; j < diploidSize ; j++){ 
+		std::string targetdiploid = diploidVec[j];
+		std::size_t ct = std::count(targetdiploid.begin(),targetdiploid.end(),'T');
+		if (ct == 2)
+			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 2*FITNESS;
+		else if (ct == 1)
+			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = FITNESS; 
+		else 
+			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 0;	
+	}
+	for (int i = 0; i < numberofSNPs; i++){	
+		for (int j = 0; j < diploidSize; j++){
+				std::cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
+			}
+			std::cout << std::endl;
+		}
+}
 		
-void Individuals :: DisplayTable(double* PopulationFitnessTable, int NumberofSNPs){
+/*void Individuals :: DisplayTable(double* PopulationFitnessTable, int NumberofSNPs){
 	for (int i = 0; i < NumberofSNPs; i++){	
 		for (int j = 0; j < diploidSize; j++){
 				std::cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
@@ -126,7 +154,7 @@ void Individuals :: DisplayTable(double* PopulationFitnessTable, int NumberofSNP
 			std::cout << std::endl;
 		}
 	}
-
+*/
 //This gets the position of the allele by finding where it lies in the std::vector of diploids which is in GlobalIndivs class 
 int Individuals :: getPosAllele(std::vector<string> Retrievedpair){
 	
@@ -151,14 +179,14 @@ int Individuals :: getPosAllele(std::vector<string> Retrievedpair){
 //This is done everytime the parents sends a std::set of SNPs to the child 
 //This also saves the SNPs before and after mutations, helping us track while building the ARGs
 
-std::pair<std::pair<std::vector<string>, int >, int> Individuals :: Mutate(std::vector<string> haploids, double MutationRate, int L){
+std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> haploids, double MutationRate, int L){
 
 	int numSNP = haploids.size();
 	int mutidx; 
 	string targetallele;
 	std::vector<string> tmpbaseVec(baseVec.size());
 	std::vector<string> mutatedhaploids(numSNP); 
-	std::pair<std::pair<std::vector<string>, int >, int> MutAlleleContainer;
+	std::pair<std::vector<string>, int> MutAlleleContainer;
 	int index; 
 
 	int localmut;
@@ -187,7 +215,8 @@ std::pair<std::pair<std::vector<string>, int >, int> Individuals :: Mutate(std::
 		localmut = SNPsToMutate;
 		for (int z = 0; z < SNPsToMutate; z++){
 			if(flagmut == 0){
-				SelectedSNPID = RandNumbers[0];
+				SelectedSNPID = MutateLocs[1];
+				FitnessON(SelectedSNPID);
 				//std::cout << std::endl << "Updated at " << SelectedSNPID << std::endl;
 				flagmut = 1;
 			}
@@ -211,7 +240,7 @@ std::pair<std::pair<std::vector<string>, int >, int> Individuals :: Mutate(std::
 		}			
 }
 	
-	MutAlleleContainer = std::make_pair(std::make_pair(mutatedhaploids,localmut),SelectedSNPID);
+	MutAlleleContainer = std::make_pair(mutatedhaploids,localmut);
 	//if (flagmut == 1)
 	//	SelectedSNPID = -1;
 	mutatedhaploids.clear();
@@ -265,19 +294,19 @@ AlleleInfo Individuals :: GetAllelesforChild(int Pidx, std::vector<std::pair<std
 		std::string s = "";
 		for (const auto &piece1 : haploids) s += piece1;
 
-	std::pair<std::pair<std::vector<string>, int >, int> MutBox;
+	std::pair<std::vector<string>, int >MutBox;
 	
 	 MutBox = Mutate(haploids,MutationRate,L);
 	
-	MutatedHaploids = MutBox.first.first; 
-	localmut = MutBox.first.second;
-	int snpid = MutBox.second;
+	MutatedHaploids = MutBox.first; 
+	localmut = MutBox.second;
+	
 	//MutatedposInfo = MutBox.second; 
 	Events event; 
 	int localrecomb = 0;
 	int pos = -1; //might change afterwards, don't worry about this
 	
-	toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb, snpid);
+	toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb);
 	
 	haploids.clear();
 	MutatedHaploids.clear();
@@ -321,7 +350,7 @@ AlleleInfo Individuals :: GetCrossOverAlleles(int Pidx, std::vector<std::pair<st
 	string chromID, chromname;
 	std::pair<std::pair<string,int>,std::pair<string,int> > ContributingChroms; 
 	std::pair<string,int> c1,c2;
-	std::pair<std::pair<std::vector<string>, int >, int> MutBox;
+	std::pair<std::vector<string>, int > MutBox;
 	std::vector<string> MutatedHaploids;
 	Events event;
 	std::string s;
@@ -386,12 +415,12 @@ AlleleInfo Individuals :: GetCrossOverAlleles(int Pidx, std::vector<std::pair<st
 		
 				ContributingChroms = std::make_pair(c1,c2);
 				MutBox = Mutate(haploids,MutationRate,L);
-				MutatedHaploids = MutBox.first.first; 
-				localmut = MutBox.first.second; 
-				int snpid = MutBox.second;
+				MutatedHaploids = MutBox.first; 
+				localmut = MutBox.second; 
+				
 				chromname = AddandGetChromName(GenNum);
 		//passed on to the child in the AlleleInfo container
-				toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb, snpid);
+				toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb);
 		
 				haploids.clear();
 				haploids.resize(numSNP);
@@ -450,11 +479,11 @@ AlleleInfo Individuals :: GetCrossOverAlleles(int Pidx, std::vector<std::pair<st
 			//	std::cout << std::endl << "haploids: " << s << std::endl;
 				ContributingChroms = std::make_pair(c1,c2);
  				MutBox = Mutate(haploids,MutationRate,L);
-				MutatedHaploids = MutBox.first.first; 
-				localmut = MutBox.first.second; 
+				MutatedHaploids = MutBox.first; 
+				localmut = MutBox.second; 
 				chromname = AddandGetChromName(GenNum);
-				int snpid = MutBox.second;
-				toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb, snpid);
+				
+				toChild = event.getandPopulateStruct(pos, Pidx, chromname, ContributingChroms, MutatedHaploids, localmut, localrecomb);
 				
 				haploids.clear();
 				haploids.resize(numSNP);
@@ -474,7 +503,7 @@ AlleleInfo Individuals :: AskChromosome (int Pidx, std::vector<std::pair<std::pa
 		//Coin Toss
 		string s;
 		double randrecom = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
-		
+		//std::cout << std::endl << "randrecom is " << randrecom << std::endl; 
 		//4 bins and seeing where the coin lands
 
 		double RecombRate = rrate*L;
