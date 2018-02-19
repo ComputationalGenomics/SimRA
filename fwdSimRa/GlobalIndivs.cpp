@@ -42,7 +42,7 @@ gsl_rng** threadvec = new gsl_rng*[omp_get_max_threads()];
 string chromid = "chrom";
 //This std::map stores the key-value std::pairs of the chromosome ID followed by their information of past-present-future
 //std::map <string, ChromosomeInfo> AllChromRecords;
-int NUMRUN = 30;
+int NUMRUN = 50;
 int RecombCount = 0;
 int MutCount = 0; 
 double FITNESS;
