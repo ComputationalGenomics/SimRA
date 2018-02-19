@@ -67,7 +67,8 @@ void Individuals :: Addlabel(){
 //It picks a random number of 4 digits, converts it to string and follows the nomenclature of Chrom_GenNum_RandomNumber to name the chromosome ID
 string Individuals :: AddandGetChromName(int GenNum){
 	//int num = rand()%9000+1000;
-	int num = (int)(RandU(0,1)*1000000)%9000+1000;
+	//std::cout << "thread num is: " << omp_get_thread_num() << "  " << threadvec[omp_get_thread_num()] << std::endl; 
+	int num = (int)(gsl_rng_uniform(threadvec[omp_get_thread_num()])*1000000)%9000+1000;
 	std::string numstr = std::to_string(num);
 	std::string numstr1 = std::to_string(GenNum);
 	
@@ -91,13 +92,15 @@ std::vector<int> Individuals :: GetLocSegment(int NumberofSNPs,int L){
 	int *SelRandNum = new int [NumberofSNPs];
 	for (int z = 0; z < L; z++) 
 		RandNumbers[z] = z; 
-	std::vector<int> Rndnums(RandNumbers,RandNumbers+L);
-	 //std::cout << std::endl << "before shuffle!" << std::endl;
-	//gsl_ran_shuffle(threadvec[omp_get_thread_num()],RandNumbers, L, sizeof (int));
-	std::random_shuffle(Rndnums.begin(),Rndnums.end());
+	//std::vector<int> Rndnums(RandNumbers,RandNumbers+L);
+	// std::cout << std::endl << "before shuffle!" << std::endl;
+	gsl_ran_shuffle(threadvec[omp_get_thread_num()],RandNumbers, L, sizeof (int));
+	//std::random_shuffle(Rndnums.begin(),Rndnums.end());
 	//gsl_ran_choose(threadvec[omp_get_thread_num()],SelRandNum, NumberofSNPs, RandNumbers, L, sizeof (int));
 	for(int z = 0; z < NumberofSNPs; z++)
-		ChromSegLoc[z] = Rndnums[z];
+		ChromSegLoc[z] = RandNumbers[z];
+	delete[] RandNumbers;
+	delete[] SelRandNum;
 	return ChromSegLoc; 
 	}
 
@@ -131,19 +134,20 @@ void Individuals::FitnessON(int SelectedSNPID){
 	for (int j = 0; j < diploidSize ; j++){ 
 		std::string targetdiploid = diploidVec[j];
 		std::size_t ct = std::count(targetdiploid.begin(),targetdiploid.end(),'T');
+		//std::cout << std::endl << targetdiploid << " SelectedSNPID: " << SelectedSNPID << std::endl;
 		if (ct == 2)
 			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 2*FITNESS;
 		else if (ct == 1)
 			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = FITNESS; 
 		else 
-			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 0;	
+			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 0.0;	
 	}
-	for (int i = 0; i < numberofSNPs; i++){	
+	/*for (int i = 0; i < numberofSNPs; i++){	
 		for (int j = 0; j < diploidSize; j++){
 				std::cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
 			}
 			std::cout << std::endl;
-		}
+		}*/
 }
 		
 /*void Individuals :: DisplayTable(double* PopulationFitnessTable, int NumberofSNPs){
@@ -192,7 +196,6 @@ std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> h
 	int localmut;
 	if (MutationRate == 0){
 		mutatedhaploids = haploids;
-
 		localmut = 0;
 	}
 	else{
@@ -209,13 +212,18 @@ std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> h
 		tmpbaseVec = baseVec;
 		double randmut = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
 		gsl_ran_shuffle(threadvec[omp_get_thread_num()],RandNumbers, numSNP, sizeof (int));
-		//gsl_ran_choose(threadvec[omp_get_thread_num()], MutateLocs, SNPsToMutate, RandNumbers, numSNP, sizeof (int));
+		gsl_ran_choose(threadvec[omp_get_thread_num()], MutateLocs, SNPsToMutate, RandNumbers, numSNP, sizeof (int));
 		
 		mutatedhaploids = haploids;
 		localmut = SNPsToMutate;
+		/*for (int la = 0; la < SNPsToMutate; la++)
+			std::cout  << MutateLocs[la] << " ";
+		std::cout << std::endl;*/
 		for (int z = 0; z < SNPsToMutate; z++){
+			#pragma omp critical
 			if(flagmut == 0){
-				SelectedSNPID = MutateLocs[1];
+				
+				SelectedSNPID = MutateLocs[0];
 				FitnessON(SelectedSNPID);
 				//std::cout << std::endl << "Updated at " << SelectedSNPID << std::endl;
 				flagmut = 1;
@@ -237,13 +245,15 @@ std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> h
 					mutatedhaploids[RandNumbers[z]] = tmpbaseVec[2]; 
 					MutCount++;
 			}
-		}			
-}
+		}
+		delete[] RandNumbers;
+		delete[] MutateLocs;
+	}
 	
 	MutAlleleContainer = std::make_pair(mutatedhaploids,localmut);
 	//if (flagmut == 1)
 	//	SelectedSNPID = -1;
-	mutatedhaploids.clear();
+	mutatedhaploids.clear();	
 	return MutAlleleContainer; 
 }
 //This method gets the alleles for the child when there's no recombination. This can happen two ways, either father sends all of his father's SNPs to child, or,
@@ -502,6 +512,7 @@ AlleleInfo Individuals :: AskChromosome (int Pidx, std::vector<std::pair<std::pa
 		int recomidx; 	
 		//Coin Toss
 		string s;
+		//std::cout << std::endl << "lo" << std::endl;
 		double randrecom = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
 		//std::cout << std::endl << "randrecom is " << randrecom << std::endl; 
 		//4 bins and seeing where the coin lands

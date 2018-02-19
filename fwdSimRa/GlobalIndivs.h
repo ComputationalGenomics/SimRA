@@ -35,7 +35,7 @@ extern int *ps;
 extern int *numsnp;
 extern int *gn;
 extern int numberofSNPs; 
-extern double *PopulationFitnessTable;
+extern std::vector<double>PopulationFitnessTable;
 extern std::vector<std::pair<std::pair<string,string>, std::pair <string,string> > > ExtantHaploids;
 extern std::vector<string> baseVec; 
 extern std::vector<int> RandNumbers;
