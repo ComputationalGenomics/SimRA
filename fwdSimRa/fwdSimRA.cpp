@@ -31,7 +31,8 @@ Last Update: 2/19/2018
 #include "ChrInfo.h"
 int GenNum; 
 //std::vector<int> ArgPop {10,20,40,60,80};
-std::vector<int> ArgPop{3,6,9,12};
+std::vector<int> ArgPop {20,50,80,120};
+//std::vector<int> ArgPop{3,6,9,12};
 //double PopulationFitnessTable = new double[numberofSNPs*diploidSize];
 std::vector<double> PopulationFitnessTable;
 int main(int argc, char *argv[])
