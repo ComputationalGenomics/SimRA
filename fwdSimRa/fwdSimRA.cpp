@@ -1,3 +1,8 @@
+/*
+SSimRA: A framework for selection in coalescence with Recombination 
+Author: Aritra Bose 
+Last Update: 2/19/2018
+*/
 #include<iostream>
 #include<string.h>
 #include<vector>
