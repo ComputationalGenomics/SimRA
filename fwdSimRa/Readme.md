@@ -33,7 +33,7 @@ For example if we want to run for N = 500 (250 males and 250 females) and r = 1e
 ```
 This will generate 4 files for m = {20, 40, 80, 120}
 
-If you want to vary different m's, please edit the header of the MainSSimRA.cpp file with the corresponding values of extant units(m). 
+If you want to vary different m's, please edit the header of the fwdSSimRA.cpp file with the corresponding values of extant units(m). 
 
 # Contributing
 
