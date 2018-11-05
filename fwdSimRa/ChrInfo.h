@@ -1,7 +1,7 @@
 /*
-SSimRA: A framework for selection in coalescence with Recombination 
+fwdSimRA: A framework for selection forward-in-time with Recombination 
 Author: Aritra Bose 
-Last Update: 08/11/2016
+Last Update: 11/04/2018
 
 This is a class where each Chromosome information is stored. This stores information of each chromosome's present, past and future states. 
 This chromosome information records the parent's chromosome IDs and the number of SNP they contributed to the present chromosome. The present
