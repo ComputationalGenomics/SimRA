@@ -1,8 +1,8 @@
 /*
 
-SSimRA: A framework for selection in coalescence with Recombination 
+fwdSimRA: A framework for selection forward-in-time with Recombination 
 Author: Aritra Bose 
-Last Update: 08/11/2016
+Last Update: 11/04/2018
 
 This is a class where each all variables which is used globally and which doesn't change with each generation is kept. 
 */
@@ -40,14 +40,21 @@ int diploidSize = diploidVec.size();
 gsl_rng** threadvec = new gsl_rng*[omp_get_max_threads()];
 //This is for naming the chromosomes 
 string chromid = "chrom";
+std::vector<int> epistatus; 
 //This std::map stores the key-value std::pairs of the chromosome ID followed by their information of past-present-future
 //std::map <string, ChromosomeInfo> AllChromRecords;
-int NUMRUN = 50;
+int NUMRUN;
 int RecombCount = 0;
 int MutCount = 0; 
 double FITNESS;
+double EpiFit1;
+double EpiFit2;
+double delta; 
 int flag = 0;
-int numberofSNPs; 
+int numberofSNPs,newnumSNPs; 
+int epiSNPs; 
+int nonepiSNPs;
+//int GenNum; 
 int flagmut = 0;
 int SelectedSNPID = -1; 
 std::map<int, std::vector<std::pair<std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > >, std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > > > >  AllChromRecords;
@@ -111,9 +118,9 @@ double Dcalc(double x){
 	 return x*x;
 	}
 	
-double GetDiversity(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID){
+std::pair<double,double> GetDiversity(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID){
 	std::vector<string> SelectedSNPs(ChromID.size()); 
-	std::string allHaps = "";
+	//std::string allHaps = "";
 	for (int bb = 0; bb < ChromID.size(); bb++){
 			string SelChrID = ChromID[bb];
 			for (std::vector<std::pair<string,std::vector<string> > >::iterator it1 = Haps.begin(); it1 != Haps.end(); ++it1){
@@ -122,29 +129,64 @@ double GetDiversity(std::vector<std::pair<string,std::vector<string> > > Haps, s
 					std::vector<string> tmphaps = it1->second; 
 					for (int z = 0; z < tmphaps.size(); z++)
 							strhaps += tmphaps[z];
-						//std::cout << std::endl << strhaps << std::endl;
+							//std::cout << std::endl << strhaps << std::endl;
 					SelectedSNPs[bb] = strhaps;
 					tmphaps.clear();
 				}else
 					continue;
 			}
-		allHaps += SelectedSNPs[bb]; 
-		//std::cout << std::endl << "Selected SNP was: " << SelectedSNPs[bb] << std::endl;
+		//allHaps += SelectedSNPs[bb]; 
+		std::cout << std::endl << "Selected SNP was: " << SelectedSNPs[bb] << std::endl;
 
 	}
-	
+	int selall = 0;
+	std::vector<double> SNPsums(numberofSNPs);
+	for( int i = 0; i < numberofSNPs; i++){
+		
+		int sumAT = 0, sumCG = 0,maxsum; 
+		double pj;
+		for( int j = 0; j < ChromID.size(); j++){
+			string strhaps = SelectedSNPs[j];
+			if(strhaps[i] == 'A' || strhaps[i] == 'T')
+				sumAT++; 
+			if(strhaps[i] == 'C'|| strhaps[i] == 'G')
+				sumCG++;
+			if(i == SelectedSNPID){
+				if(strhaps[i] == 'T')
+					selall++;
+			}
+		}
+		if(sumAT > sumCG)
+			maxsum = sumAT; 
+		else
+			maxsum = sumCG; 
+		std::cout << "Maxsum is: " << maxsum << std::endl; 
+		pj = maxsum/(double)ChromID.size(); 
+		std::cout << "pj is: " << pj<< std::endl;
+		SNPsums[i] = 2*pj*(1-pj);
+	}
+	std::cout << std::endl << "Selected SNP id is " << SelectedSNPID << " || Selected allele is in " << selall << " extant indivs" << std::endl;
+	double pundersel = (double)selall/(double)ChromID.size();
+	double sum_of_elems = 0.0;
+	for(std::vector<double>::iterator it = SNPsums.begin(); it != SNPsums.end(); ++it){
+		sum_of_elems += *it;
+		std::cout << *it << " "; 
+	}
+	std::cout << std::endl;
+
+	return std::make_pair(sum_of_elems,pundersel); 
+
 	//for (int i = 0; ChromID.size(); i++)
 		//allHaps += SelectedSNPs[i];
 
-	double accu = 0;
+	/*double accu = 0;
 	for (int i = 0; i < allHaps.size(); i++){
 		double n = std::count(allHaps.begin(), allHaps.end(), allHaps[i]);
 		double ct = n/allHaps.size();
 		accu += ((ct/allHaps.size())*(1-(ct/allHaps.size())));
 	}
 	//double normacc = (accu)/allHaps.size();
-	return accu;
-	//std::cout << std::endl << "Projapoti Biscuit: " << normacc << std::endl;
+	return accu;*/
 }
 std::vector<double> GetL (std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID){
 	std::vector<string> SelectedSNPs(ChromID.size()); 
@@ -238,3 +280,4 @@ std::vector<string>  Getpairs(int n, std::vector<std::pair<std::pair<string,stri
 string firstElement( const std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > &p ) {
     return p.first;
 }
+bool nnz(int i) {return (i != 0); }
