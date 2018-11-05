@@ -1,6 +1,6 @@
 
 /*
-SSimRA: A framework for selection in coalescence with Recombination 
+fwdSimRA: A framework for selection forward-in-time with Recombination 
 Author: Aritra Bose 
 Last Update: 11/4/2018
 */
