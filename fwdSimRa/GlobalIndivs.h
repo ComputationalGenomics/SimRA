@@ -1,8 +1,8 @@
 /*
 
-SSimRA: A framework for selection in coalescence with Recombination 
+fwdSimRA: A framework for selection forward-in-time with Recombination 
 Author: Aritra Bose 
-Last Update: 08/11/2016
+Last Update: 11/04/2018
 
 This is a class where each all variables which is used globally and which doesn't change with each generation is kept. 
 */
@@ -35,7 +35,16 @@ extern int *ps;
 extern int *numsnp;
 extern int *gn;
 extern int numberofSNPs; 
+extern int epiSNPs; 
+extern int nonepiSNPs;
+extern double EpiFit1; 
+extern double EpiFit2; 
+extern double delta;
+extern int newnumSNPs; 
 extern std::vector<double>PopulationFitnessTable;
+extern std::vector<double>EpiFitnessTable; 
+extern std::vector<int> epistatus;  
+extern std::vector<std::vector<int> > newSNPs;
 extern std::vector<std::pair<std::pair<string,string>, std::pair <string,string> > > ExtantHaploids;
 extern std::vector<string> baseVec; 
 extern std::vector<int> RandNumbers;
@@ -67,7 +76,7 @@ double computeSquare(double x);
 bool IsInteger(float k);
 double Dcalc(double x);
 std::vector<double> GetLineages(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID);
-double GetDiversity(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID);
+std::pair<double,double> GetDiversity(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID);
 void InitializeThread();
 void FreeThread();
 std::pair<int, std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > > RetrieveListElement(int);
@@ -79,3 +88,4 @@ std::vector<double> GetL (std::vector<std::pair<string,std::vector<string> > > H
 
 string firstElement( const std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > &p );
 
+bool nnz(int i); 
