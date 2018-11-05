@@ -25,11 +25,11 @@ Some compilers might abort with an error about CBLAS linkage unavailability. In 
 
 To run the package execute the following command: 
 ```
-./fwdSimRA population_size(N) recombination_rate(r) mutation_rate(mu) chromosome_length(L) fitness_value(f)
+./fwdSimRA population_size(N) recombination_rate(r) mutation_rate(mu) chromosome_length(L) fitness_value(f) fitness_Value_of_first_allele (s1) fitness_value_of_second_allele (s2) Interaction_parameter (Delta) Number_of_interactions (iter)
 ```
-For example if we want to run for N = 500 (250 males and 250 females) and r = 1e-7, mu = 15e-8, L = 20000, f = 0.3, we execute it as:
+For example if we want to run for N = 500 (250 males and 250 females) and r = 1e-7, mu = 15e-8, L = 20000, f = 0, s1 = 1, s2 = 0, delta = 0, iter = 100, we execute it as:
 ```
-./fwdSimRA 250 0.0000001 0.00000015 20000 0.3 
+./fwdSimRA 250 0.0000001 0.00000015 20000 0 1 0 0 100
 ```
 This will generate 4 files for m = {20, 40, 80, 120}
 
