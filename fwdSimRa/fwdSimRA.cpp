@@ -1,8 +1,11 @@
+
 /*
 SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
-Last Update: 2/19/2018
+Last Update: 11/4/2018
 */
+
+
 #include<iostream>
 #include<string.h>
 #include<vector>
@@ -24,17 +27,21 @@ Last Update: 2/19/2018
 #include<omp.h>
 #include <gsl/gsl_rng.h>
 #include<pthread.h>
+#include<chrono>
 //Including required libraries
 #include "Individuals.h"
 #include "GlobalIndivs.h"
 #include "Events.h"
 #include "ChrInfo.h"
 int GenNum; 
-//std::vector<int> ArgPop {10,20,40,60,80};
-std::vector<int> ArgPop {20,50,80,120};
-//std::vector<int> ArgPop{3,6,9,12};
+//std::vector<int> ArgPop {10,20,40,50,60,80};
+//std::vector<int> ArgPop{10,15,20,25};
+std::vector<int> ArgPop{20,30};
 //double PopulationFitnessTable = new double[numberofSNPs*diploidSize];
 std::vector<double> PopulationFitnessTable;
+std::vector<double>EpiFitnessTable;
+std::vector<std::vector<int> > newSNPs; 
+
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -53,7 +60,7 @@ int main(int argc, char *argv[])
     int popSize = atoi(argv[1]);
 
    	//Takes the number of Generations from user
-	int GenNum = popSize*2*2*2*2;
+	GenNum = popSize*2*2*2*2*2;
 
 	//Takes in the rate of recombination, the input has to be a probability, hence between 0 and 1
 	double RecombRate = atof(argv[2]); 
@@ -85,6 +92,18 @@ int main(int argc, char *argv[])
 	
 	FITNESS = atof(argv[5]);
 	std::cout << std::endl << "FITNESS is set to: " << FITNESS << std::endl;
+	
+	EpiFit1 = atof(argv[6]);
+    std::cout << std::endl << "EpiFit1 is set to: " << EpiFit1 << std::endl;
+
+	EpiFit2 = atof(argv[7]);
+    std::cout << std::endl << "EpiFit2 is set to: " << EpiFit2 << std::endl;
+	
+	delta = atof(argv[8]);
+	std::cout << std::endl << "Delta is set to: " << delta << std::endl;	
+	
+	NUMRUN = atof(argv[9]);
+	std::cout << std::endl << "Starting  " << NUMRUN << " simulations" << std::endl;
 	//Define an array of objects of the Individuals class. Each location will contain the information pertaining to that generation. 
 	//This is done each for the male and female. 
 	/*Individuals *NewGenMale = new Individuals[GenNum];
@@ -109,9 +128,12 @@ int main(int argc, char *argv[])
 	std::string reco = std::to_string(RecombRate);
 	std::string mutu = std::to_string(MutationRate);
 	std::string fit = std::to_string(FITNESS); 
+	std::string ep1 = std::to_string(EpiFit1);
+	std::string ep2 = std::to_string(EpiFit2);
+	std::string del = std::to_string(delta);
 	//std::setting up the base chromosome where there's no previous contributions
 	//std::pair<std::pair<string,int>,std::pair<string,int> > BaseChrom = std::make_pair(std::make_pair("0",0),std::make_pair("0",0));
-	//The Parent ID for the base generation is defined to be -1, to get rid of ambiguations
+	//The Parent ID for the base generation is defined to be -1, to get rid of ambiguity
 	int Pid = -1;
 	//std::setting up the base chromosome where there's no previous contributions
 	//Declaring the object of te class ChrInfo. Through this object we will store information about each chromosome 
@@ -125,6 +147,8 @@ int main(int argc, char *argv[])
 	std::vector<int> HT(NUMRUN*ArgPop.size()); 
 	std::vector<int> rec(NUMRUN*ArgPop.size()); 
 	std::vector<int> mut(NUMRUN*ArgPop.size());
+	std::vector<double> Div(NUMRUN*ArgPop.size());
+	std::vector<double> Sel(NUMRUN*ArgPop.size());
 	for (int loops = 0; loops < NUMRUN; loops++){
 		clock_t begin_loop = omp_get_wtime(); 
 		Individuals *NewGenMale = new Individuals[GenNum];
@@ -136,89 +160,173 @@ int main(int argc, char *argv[])
 		MutCount = 0; 
 		RecombCount = 0;
 		AllChromVec.resize(popSize*2);
-	for(int i = 0; i < popSize*2 ; i++){
-		if(i < popSize){
-			sexflag = 1;
-			string chromname1 = NewGenMale[0].AddandGetChromName(0);
-			string chromname2 = NewGenMale[0].AddandGetChromName(0);
-			//ChromosomeInfo BoxofChrom = ChrObject.PopulateAndGetChrInfo(std::make_pair(Pid,0), 0, i, sexflag, BaseChrom);
-			AllChromVec[i] = std::make_pair(std::make_pair(chromname1,BaseChrom), std::make_pair(chromname2,BaseChrom)); 	
-					//std::cout << std::endl << "val of i: " << i << std::endl;
-			//std::cout << std::endl << "Size of ACV: " << AllChromVec.size() << std::endl;		
-			for(int j = 0; j < numberofSNPs; j++) {					
-				std::pair <string,string> chrompair1 = std::make_pair(chromname1,bases[rand()%4]);
-				std::pair <string,string> chrompair2 = std::make_pair(chromname2,bases[rand()%4]);
-				//std::cout << std::endl << "val of j: " << j << std::endl;
-				NewGenMale[0].Addpairs(std::make_pair(chrompair1,chrompair2),i*numberofSNPs+j);
-				//std::cout << std::endl << "crossed male ?" << std::endl;
+		int *RandNumbers = new int[numberofSNPs];
+		std::vector<int> SelectedPopforArg;
+		for (int i = 0; i < numberofSNPs; i++) 
+			RandNumbers[i] = i;
+		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+		shuffle(RandNumbers,RandNumbers+(numberofSNPs), std::default_random_engine(seed));
+		std::vector<int> RandVec(RandNumbers, RandNumbers+(numberofSNPs));
+		epistatus.resize(numberofSNPs);
+		
+		for(int i = 0; i < numberofSNPs; i++){
+			std::vector<int> tmpSNP; 
+			double r = ((double) rand()/(RAND_MAX));
+			if(r < 0.5 && RandVec.size() > 1){
+				int pos1 = rand()%RandVec.size();
+				//std::cout << " pos1 is " << pos1 << " and selected is " << RandVec[pos1] << std::endl; 
+				tmpSNP.push_back(RandVec[pos1]);
+				epistatus[RandVec[pos1]] = 1; 
+				RandVec.erase(RandVec.begin()+pos1);
+				int pos2 = rand()%RandVec.size();
+				epistatus[RandVec[pos2]] = 1;
+				//std::cout << " pos2 is " << pos2 << " and selected is " << RandVec[pos2] << std::endl;
+				tmpSNP.push_back(RandVec[pos2]);
+				RandVec.erase(RandVec.begin()+pos2);
+			}
+			else{
+				int pos = rand()%RandVec.size();
+				epistatus[RandVec[pos]] = 0; 
+				//std::cout << " pos is " << pos << " and selected is " << RandVec[pos] << std::endl; ;
+				tmpSNP.push_back(RandVec[pos]);
+				RandVec.erase(RandVec.begin() + pos);
+			}
+		
+			newSNPs.push_back(tmpSNP);
+			tmpSNP.clear();
+			if(RandVec.size() == 0)
+				break;
+		}
+		int epict = count_if(epistatus.begin(), epistatus.end(), nnz);
+		epiSNPs = epict/2;  
+		nonepiSNPs = numberofSNPs - (2*epiSNPs); 
+		newnumSNPs = epiSNPs + nonepiSNPs; 
+		std::cout << "Number of epiSNPs: " << epiSNPs << " and number of non epi snps: " << nonepiSNPs << std::endl; 
+		delete[] RandNumbers;
+		for(std::vector<std::vector<int>>::iterator it = newSNPs.begin(); it != newSNPs.end(); ++it){
+			for(std::vector<int>::iterator it1 = it->begin(); it1 != it->end(); ++it1){
+				std::cout << " " << *it1; 
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl << "END" << std::endl;
+		for(int i = 0; i < popSize*2 ; i++){
+			if(i < popSize){
+				sexflag = 1;
+				string chromname1 = NewGenMale[0].AddandGetChromName(0);
+				string chromname2 = NewGenMale[0].AddandGetChromName(0);
+				//ChromosomeInfo BoxofChrom = ChrObject.PopulateAndGetChrInfo(std::make_pair(Pid,0), 0, i, sexflag, BaseChrom);
+				AllChromVec[i] = std::make_pair(std::make_pair(chromname1,BaseChrom), std::make_pair(chromname2,BaseChrom)); 	
+				for(int j = 0; j < numberofSNPs; j++) {					
+					std::pair <string,string> chrompair1 = std::make_pair(chromname1,bases[rand()%4]);
+					std::pair <string,string> chrompair2 = std::make_pair(chromname2,bases[rand()%4]);
+					NewGenMale[0].Addpairs(std::make_pair(chrompair1,chrompair2),i*numberofSNPs+j);
+					
+				}
+			}
+			else{
+				sexflag = 0; 
+				string chromname1 = NewGenFemale[0].AddandGetChromName(0);
+				string chromname2 = NewGenFemale[0].AddandGetChromName(0);
+				AllChromVec[i] = std::make_pair(std::make_pair(chromname1,BaseChrom), std::make_pair(chromname2,BaseChrom)); 	
+
+				for(int j = 0; j < numberofSNPs; j++) {
+					std::pair <string,string> chrompair3 = std::make_pair(chromname1,bases[rand()%4]);
+					std::pair <string,string> chrompair4 = std::make_pair(chromname2,bases[rand()%4]);
+
+					NewGenFemale[0].Addpairs(std::make_pair(chrompair3,chrompair4),(i-popSize)*numberofSNPs+j);
+					
+				}	
 			}
 		}
-		else{
-			sexflag = 0; 
-			string chromname1 = NewGenFemale[0].AddandGetChromName(0);
-			string chromname2 = NewGenFemale[0].AddandGetChromName(0);
-			AllChromVec[i] = std::make_pair(std::make_pair(chromname1,BaseChrom), std::make_pair(chromname2,BaseChrom)); 	
-
-			for(int j = 0; j < numberofSNPs; j++) {
-				std::pair <string,string> chrompair3 = std::make_pair(chromname1,bases[rand()%4]);
-				std::pair <string,string> chrompair4 = std::make_pair(chromname2,bases[rand()%4]);
-
-				NewGenFemale[0].Addpairs(std::make_pair(chrompair3,chrompair4),(i-popSize)*numberofSNPs+j);
-				
-			}	
-		}
-	}
-	AllChromRecords.insert(std::make_pair(0,AllChromVec));
-	AllChromVec.clear();
-	//Saving the base generation chromosome information to the containers, to be used by the next generation
-	std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > M_ChromContainer = NewGenMale[0].getChromContainer();
-	std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > F_ChromContainer = NewGenFemale[0].getChromContainer();
-	//std::vector<int> gaboo(5);
-	//std::fill(gaboo.begin(),gaboo.end(),0);
-	/*for(int i = 0; i<5; i++)
-		std::cout << gaboo[i] << " | ";
-	std::cout << std::endl;*/
-	PopulationFitnessTable.resize(numberofSNPs*diploidSize);
-	//We get the fitness tables. This will remain constant throughout the analysis. 
-	std::fill(PopulationFitnessTable.begin(),PopulationFitnessTable.end(), 0.0);
-	//std::cout << "filled" << std::endl;
-	/*for (int i = 0; i < PopulationFitnessTable.size(); i++)
-		std::cout << PopulationFitnessTable.at(i) << " | ";
-	std::cout << std::endl; */
-	/*for (int i = 0; i < numberofSNPs; i++){	
-		for (int j = 0; j < diploidSize; j++){
-			//if (PopulationFitnessTable[i*diploidSize + j] != 0.0)
-				//PopulationFitnessTable[i*diploidSize + j] = 0.0;
-			//std::cout << PopulationFitnessTable.at(0);
-			std::cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
-		}
-		std::cout << std::endl;
-	}*/
-	omp_set_dynamic(0);
-	clock_t b2 = omp_get_wtime();
+		AllChromRecords.insert(std::make_pair(0,AllChromVec));
+		AllChromVec.clear();
+		//Saving the base generation chromosome information to the containers, to be used by the next generation
+		std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > M_ChromContainer = NewGenMale[0].getChromContainer();
+		std::vector<std::pair<std::pair<string,string>, std::pair<string,string> > > F_ChromContainer = NewGenFemale[0].getChromContainer();
+	
+		PopulationFitnessTable.resize(numberofSNPs*diploidSize);
+		//We get the fitness tables. This will remain constant throughout the analysis. 
+		std::fill(PopulationFitnessTable.begin(),PopulationFitnessTable.end(), 0.0);
+		EpiFitnessTable.resize(epiSNPs*diploidSize*diploidSize);
+	
+		omp_set_dynamic(0);
+		clock_t b2 = omp_get_wtime();
 	//This marks the start of building the entire network across generations. 
-	for (int g = 1; g < GenNum; g++){
-		 clock_t b1 = omp_get_wtime();
-		//Reserving Space for each generation's chromosome container. 
-		NewGenMale[g].ReserveSpace(numberofSNPs*popSize);
-		NewGenFemale[g].ReserveSpace(numberofSNPs*popSize);
-		//Declaring std::vectors to calculate the probability of each individual selecting a parent
+		for (int g = 1; g < GenNum; g++){
+			clock_t b1 = omp_get_wtime();
+			//Reserving Space for each generation's chromosome container. 
+			NewGenMale[g].ReserveSpace(numberofSNPs*popSize);
+			NewGenFemale[g].ReserveSpace(numberofSNPs*popSize);
+			//Declaring std::vectors to calculate the probability of each individual selecting a parent
 		
-		std::vector<double> StoreProductFitness_F;
-		std::vector<double> StoreProductFitness_M; 
-		std::vector<double> indivprobs_M;
-		std::vector<double> indivprobs_F; 
-		std::vector<double> fitnessVals_M;
-		std::vector<double> fitnessVals_F;
-		std::vector<string> RetrievedpairFemale;
-		std::vector<string> RetrievedpairMale;
-		int pos_allele_F, pos_allele_M;
-		double fitness_F,fitness_M;
-		double revFit_F, revFit_M;
-		
+			std::vector<double> StoreProductFitness_F;
+			std::vector<double> StoreProductFitness_M; 
+			std::vector<double> indivprobs_M;
+			std::vector<double> indivprobs_F; 
+			std::vector<double> fitnessVals_M;
+			std::vector<double> fitnessVals_F;
+			std::vector<string> RetrievedpairFemale;
+			std::vector<string> RetrievedpairMale;
+			int pos_allele_F, pos_allele_M;
+			double fitness_F,fitness_M;
+			double revFit_F, revFit_M;
+			std::vector<string> RPM1;
+			std::vector<string> RPM2;
+			int paM1, paM2, paF1, paF2;
 		//This piece of code retrieves the fitnesses based on the chromosome containers and calculates the probabilities for each individuals
 		for (int i = 0; i < popSize*2; i++){
-			if ( i < popSize){ 
+						if ( i < popSize){ 
+				int ct1 = 0, ct2 = 0;
+				for ( int k = 0; k < newnumSNPs; k++){
+					std::vector<int> pairid = newSNPs[k];
+					if(pairid.size() == 1){
+						RetrievedpairMale = Getpairs(i*numberofSNPs + pairid[0],M_ChromContainer);
+						pos_allele_M = NewGenMale[g-1].getPosAllele(RetrievedpairMale);
+						fitness_M = PopulationFitnessTable[ct1*diploidSize + pos_allele_M];
+						revFit_M = log(1.0 + fitness_M);
+						fitnessVals_M.push_back(revFit_M);
+						ct1++;
+					}
+					else{
+						RPM1 = Getpairs(i*numberofSNPs + pairid[0],M_ChromContainer);
+						paM1 = NewGenMale[g-1].getPosAllele(RPM1);
+						RPM2 = Getpairs(i*numberofSNPs + pairid[1],M_ChromContainer);
+						paM2 = NewGenMale[g-1].getPosAllele(RPM2);
+						fitness_M = EpiFitnessTable[(ct2*diploidSize*diploidSize) + (paM1*paM2)];
+						revFit_M = log(1.0 + fitness_M);
+						fitnessVals_M.push_back(revFit_M);
+						ct2++;
+					}
+				}
+				StoreProductFitness_M.push_back(exp(ComputeSum(fitnessVals_M))); 
+			}
+			 else{
+				int ct1 = 0, ct2 = 0;
+				for ( int k = 0; k < newnumSNPs; k++){ 	
+					std::vector<int> pairid = newSNPs[k];
+					if(pairid.size() == 1){
+						RetrievedpairFemale = Getpairs((i-popSize)*numberofSNPs + pairid[0],F_ChromContainer);
+						pos_allele_F = NewGenFemale[g-1].getPosAllele(RetrievedpairFemale);
+						fitness_F = PopulationFitnessTable[ct1*diploidSize + pos_allele_F];
+						revFit_F = log(1.0 + fitness_F);
+						fitnessVals_F.push_back(revFit_F);
+						ct1++;
+					}
+					else{
+						RPM1 = Getpairs((i-popSize)*numberofSNPs + pairid[0],F_ChromContainer);
+						paM1 = NewGenFemale[g-1].getPosAllele(RPM1);
+						RPM2 = Getpairs((i-popSize)*numberofSNPs + pairid[1],F_ChromContainer);
+						paM2 = NewGenFemale[g-1].getPosAllele(RPM2);
+						fitness_F = EpiFitnessTable[(ct2*diploidSize*diploidSize) + (paM1*paM2)];
+						revFit_F = log(1.0 + fitness_F);
+						fitnessVals_F.push_back(revFit_F);
+						ct2++;
+					}
+				}
+				StoreProductFitness_F.push_back(exp(ComputeSum(fitnessVals_F)));  
+			}
+			/* if ( i < popSize){ 
 				for ( int k = 0; k < numberofSNPs; k++){
 					RetrievedpairMale = Getpairs(i*numberofSNPs + k,M_ChromContainer);
 					pos_allele_M = NewGenMale[g-1].getPosAllele(RetrievedpairMale);
@@ -240,12 +348,13 @@ int main(int argc, char *argv[])
 					fitnessVals_F.push_back(revFit_F);
 				}
 				StoreProductFitness_F.push_back(exp(ComputeSum(fitnessVals_F))); 
-			}
+			} */
 			
 			fitnessVals_F.clear();
 			fitnessVals_M.clear();
 			RetrievedpairFemale.clear();
 			RetrievedpairMale.clear();	
+			RPM1.clear(); RPM2.clear();
 		}
 		double sumprobs_F = ComputeSum(StoreProductFitness_F);
 		double sumprobs_M = ComputeSum(StoreProductFitness_M);
@@ -353,6 +462,7 @@ int main(int argc, char *argv[])
 			MotherInfo[i] = fromMother.ContChrom; 
 			ExtantHaploids[i] = std::make_pair(std::make_pair(chromid_M,haploids_M), std::make_pair(chromid_F,haploids_F));
 			AllChromVec[i] = std::make_pair(std::make_pair(fromFather.ToTheChild.first,fromFather.ContChrom),std::make_pair(fromMother.ToTheChild.first,fromMother.ContChrom));
+			//std::cout << std::endl << "From father's Mutcount: " << fromFather.MutCount << " and from Mother Mutcount: " << fromMother.MutCount << std::endl;
 			ChrMutInfo[i] = std::make_pair(std::make_pair(chromid_M,fromFather.MutCount),std::make_pair(chromid_F,fromMother.MutCount));
 			ChrRecombInfo[i] = std::make_pair(std::make_pair(chromid_M,fromFather.RecombCount),std::make_pair(chromid_F,fromMother.RecombCount));
 
@@ -479,14 +589,12 @@ int main(int argc, char *argv[])
 						if (it->first.second.first.second != numberofSNPs)
 							ArgRecomb++;
 						ChromIds.push_back(it->first.second.first.first);
-						//std::cout << "I pushed: " << it->first.second.first.first << std::endl; 
 						
 					}
 					if(it->first.second.second.second != 0){
 						if(it->first.second.second.second != numberofSNPs)
 							ArgRecomb++;
 						ChromIds.push_back(it->first.second.second.first);	
-						//std::cout << "I pushed: " << it->first.second.second.first << std::endl;
 					}
 				
 				}
@@ -496,20 +604,17 @@ int main(int argc, char *argv[])
 						if (it->second.second.first.second != numberofSNPs)
 							ArgRecomb++;
 						ChromIds.push_back(it->second.second.first.first);
-						//std::cout << "I pushed: " <<  it->second.second.first.first << std::endl;
 					}
 					if(it->second.second.second.second != 0){
 						if (it->second.second.second.second != numberofSNPs)
 							ArgRecomb++;
 						ChromIds.push_back(it->second.second.second.first);
-					//	std::cout << "I pushed: " << it->second.second.second.first << std::endl;
 					}
 					
 				}
 			}
 			for (std::vector<string>::iterator it = ExtantChromIDs.begin(); it != ExtantChromIDs.end(); ++it){
 				string SelChrID = *it;
-				//std::cout << std::endl << "Selected Chromosome IDs are: " << SelChrID << std::endl;
 				for (std::vector<std::pair<string,int> >::iterator it1 = MC.begin(); it1 != MC.end(); ++it1){
 					if (SelChrID.compare(it1->first) == 0)
 						ArgMut += it1->second;
@@ -520,14 +625,18 @@ int main(int argc, char *argv[])
 		
 		
 			
-			double D = GetDiversity(haploo, ExtantChromIDs);
-			//std::cout << std::endl << "what am i doing3" << std::endl;
+			std::pair<double,double> Dpair = GetDiversity(haploo, ExtantChromIDs);
+			double D = Dpair.first; 
+			double psel = Dpair.second;
 			haploo.clear();
 			ExtantHaps.clear();
 			std::set <string> Chrset(ChromIds.begin(),ChromIds.end());
 			ChromIds.clear();
 			ChromIds.assign(Chrset.begin(),Chrset.end());
 			Chrset.clear();
+			std::cout << " ===================== " << std::endl; 
+			std::cout << "DIVERSITY is : " << D << std::endl; 
+			std::cout << " ===================== " << std::endl;
 			
 			if (ChromIds.size() > 1){
 				flag = 0;
@@ -544,8 +653,6 @@ int main(int argc, char *argv[])
 					LeafVec.clear();
 					NewLeafVec.clear();
 					MC.clear();
-					//std::cout << std::endl << "Ht: " << ht << std::endl;
-					//Rect.clear();
 					MutChr.clear();
 					mapIterator itr = AllChromRecords.find(g);
 					MutMapIterator mtr = MutMap.find(g);
@@ -625,7 +732,6 @@ int main(int argc, char *argv[])
 						//continue;
 					}	
 					haploo.clear();
-					//ExtCount.clear();
 					ExtantHaps.clear();
 				}
 			}
@@ -644,7 +750,8 @@ int main(int argc, char *argv[])
 			LeafVec.clear();
 			NewLeafVec.clear();
 			ExHap.clear();
-			// Div[ab] = D;
+			 Sel[loops*ArgPop.size()+cd] = psel;
+			 Div[loops*ArgPop.size()+cd] = D;
 			 rec[loops*ArgPop.size()+cd] = ArgRecomb;
 			 mut[loops*ArgPop.size()+cd] = ArgMut;
 			 HT[loops*ArgPop.size()+cd] = ht;
@@ -659,30 +766,34 @@ int main(int argc, char *argv[])
 	AllHapRecords.clear();
 	MutMap.clear();
 	RecombMap.clear();
+	newSNPs.clear();
 	clock_t end_loop = omp_get_wtime(); 
 	double timediff = double(end_loop - begin_loop);
 	std::cout << std::endl << "this loop took " << timediff << " seconds to run. " << std::endl;
 	}
 	std::ofstream myfile;
+	
 	for (int cd = 0; cd < ArgPop.size(); cd++){
 		std::string strARGpop = std::to_string(ArgPop[cd]);
 		std::string strcd = std::to_string(cd);
-		string FName = "N"+strPop+"_g"+strChrLen+"r_"+reco+"mu_"+mutu+"_sel"+"_m_"+strARGpop+"fit_"+fit+"_"+strcd+".txt";
+		string FName = "N"+strPop+"_g"+strChrLen+"r_"+reco+"mu_"+mutu+"_sel"+"_m_"+strARGpop+
+					    "fit_"+fit+"_"+"s1s2_"+ep1+ep2+"_delta_"+del+".txt";
 		myfile.open(FName, ofstream::out | ofstream::app);
 		if(myfile.is_open())
-			myfile << "ARG Height" << "\t" << "# of Recombinations" << "\t" << "# of Mutations" << std::endl;
+			myfile << "ARG Height" << "\t" << "# of Recombinations" << "\t" << "# of Mutations" << "\t" << "Diversity" << "\t" << "UnderSel" << std::endl;
 		myfile.close();
 	}
 	
 	for (int cd = 0; cd < ArgPop.size(); cd++){
 		std::string strARGpop = std::to_string(ArgPop[cd]);
 		std::string strcd = std::to_string(cd);
-		string FName = "N"+strPop+"_g"+strChrLen+"r_"+reco+"mu_"+mutu+"_sel"+"_m_"+strARGpop+"fit_"+fit+"_"+strcd+".txt";
+		string FName = "N"+strPop+"_g"+strChrLen+"r_"+reco+"mu_"+mutu+"_sel"+"_m_"+strARGpop+
+					    "fit_"+fit+"_"+"s1s2_"+ep1+ep2+"_delta_"+del+".txt";
 		myfile.open(FName, ofstream::out | ofstream::app);
 		if(myfile.is_open()){
 			//myfile << "ARG Height" << "\t" << "# of Recombinations" << "\t" << "# of Mutations" << "\t" << "Time to GMRCA" << "\t" << "Diversity" << std::endl;
 			for (int x = 0; x < NUMRUN; x++)
-				myfile<< HT[x*ArgPop.size() + cd] << "\t" << rec[x*ArgPop.size() + cd] << "\t" << mut[x*ArgPop.size() + cd] << std::endl;
+				myfile<< HT[x*ArgPop.size() + cd] << "\t" << rec[x*ArgPop.size() + cd] << "\t" << mut[x*ArgPop.size() + cd] << "\t" << Div[x*ArgPop.size() + cd] << "\t" << Sel[x*ArgPop.size() + cd] << std::endl;
 					//myfile1<< HT[x] << "\t" << Rec[x] << "\t" << Mut[x] << "\t" << TtoG[x] << "\t" << Div[x] << std::endl;
 		}
 		myfile.close();
