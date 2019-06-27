@@ -1,8 +1,8 @@
 /*
 
-fwdSimRA: A framework for selection forward-in-time with Recombination 
+SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
-Last Update: 11/04/2018
+Last Update: 08/11/2016
 
 This is a class where each all variables which is used globally and which doesn't change with each generation is kept. 
 */
@@ -39,12 +39,16 @@ extern int epiSNPs;
 extern int nonepiSNPs;
 extern double EpiFit1; 
 extern double EpiFit2; 
-extern double delta;
+extern int epiflag; 
 extern int newnumSNPs; 
+extern double delta; 
+extern std::vector<double> FitVal; 
 extern std::vector<double>PopulationFitnessTable;
 extern std::vector<double>EpiFitnessTable; 
+extern std::vector<double>Epi3FitnessTable; 
 extern std::vector<int> epistatus;  
 extern std::vector<std::vector<int> > newSNPs;
+extern std::vector<std::vector<int> > nSNPs; 
 extern std::vector<std::pair<std::pair<string,string>, std::pair <string,string> > > ExtantHaploids;
 extern std::vector<string> baseVec; 
 extern std::vector<int> RandNumbers;
@@ -58,8 +62,10 @@ extern std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<stri
 extern std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > > RecombMap;
 extern int flagmut;
 extern int SelectedSNPID; 
+extern std::vector<double> seg; 
 double RandU(double min, double max);
 extern int NUMRUN;
+extern int numfit; 
 double GetExpTime(double L, int K);
 //returns a random value of type double between the min and max boundary		
 double doubleRand(double min, double max);
@@ -77,6 +83,7 @@ bool IsInteger(float k);
 double Dcalc(double x);
 std::vector<double> GetLineages(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID);
 std::pair<double,double> GetDiversity(std::vector<std::pair<string,std::vector<string> > > Haps, std::vector<string> ChromID);
+void InitializeVar();
 void InitializeThread();
 void FreeThread();
 std::pair<int, std::pair<string, std::pair<std::pair<string,int>,std::pair<string,int> > > > RetrieveListElement(int);

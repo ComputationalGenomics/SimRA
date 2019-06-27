@@ -1,8 +1,8 @@
 /*
 
-fwdSimRA: A framework for selection forward-in-time with Recombination 
+SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
-Last Update: 11/04/2018
+Last Update: 08/11/2016
 
 This is a class where each event information is stored. 
 An event is recorded when the child asks for the chromosomes from the parents and it records the position of the child, the IDs of the parents. 

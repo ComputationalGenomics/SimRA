@@ -1,8 +1,8 @@
 /*
 
-fwdSimRA: A framework for selection forward-in-time with Recombination 
+SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
-Last Update: 11/04/2018
+Last Update: 08/11/2016
 
 This is a class where each all variables which is used globally and which doesn't change with each generation is kept. 
 */
@@ -22,6 +22,7 @@ This is a class where each all variables which is used globally and which doesn'
 #include "GlobalIndivs.h"
 #include "ChrInfo.h"
 #include "Events.h"
+#include "headers.h"
 
 
 //using namespace std; 
@@ -54,6 +55,23 @@ int flag = 0;
 int numberofSNPs,newnumSNPs; 
 int epiSNPs; 
 int nonepiSNPs;
+int epiflag = 0; 
+int popSize; 
+int ChromLen; 
+int numfit; 
+std::vector<double> seg; 
+double MutationRate; 
+double RecombRate;
+std::vector<double> FitVal; 
+std::vector<std::vector<int> > nSNPs;
+int m; 
+std::vector<int> ArgPop;
+std::vector<double> PopulationFitnessTable;
+std::vector<double>EpiFitnessTable;
+std::vector<double>Epi3FitnessTable;
+std::vector<std::vector<int> > newSNPs;
+int GenNum; 
+
 //int GenNum; 
 int flagmut = 0;
 int SelectedSNPID = -1; 
@@ -61,6 +79,19 @@ std::map<int, std::vector<std::pair<std::pair<string, std::pair<std::pair<string
 std::map< int, std::vector<std::pair<std::pair<string,std::vector<string> >, std::pair<string,std::vector<string> > > > > AllHapRecords;
 std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > > MutMap;
 std::map<int, std::vector<std::pair<std::pair<string,int>, std::pair<string,int> > > > RecombMap;
+
+void InitializeVar(){
+	popSize=0; 
+	RecombRate = 0.0; 
+	MutationRate = 0.0; 
+	ChromLen = 0; 
+	FITNESS = 0; 
+	EpiFit1 = 0; 
+	EpiFit2 = 0; 
+	epiflag = 0; 
+	NUMRUN = 0; 
+	m = 0; 
+}
 void InitializeThread(){
 	
 	gsl_rng_env_setup();		
@@ -97,7 +128,7 @@ double  ComputeProduct(std::vector<double> values){
 	return mult; 
 }
 
-double  ComputeSum(std::vector<double> values){
+double ComputeSum(std::vector<double> values){
         double sum = 0.0;
         for (std::vector<double>::iterator it = values.begin(); it != values.end(); ++it)
                 sum = sum+(*it);
@@ -136,7 +167,7 @@ std::pair<double,double> GetDiversity(std::vector<std::pair<string,std::vector<s
 					continue;
 			}
 		//allHaps += SelectedSNPs[bb]; 
-		std::cout << std::endl << "Selected SNP was: " << SelectedSNPs[bb] << std::endl;
+		//std::cout << std::endl << "Selected SNP was: " << SelectedSNPs[bb] << std::endl;
 
 	}
 	int selall = 0;
@@ -160,17 +191,17 @@ std::pair<double,double> GetDiversity(std::vector<std::pair<string,std::vector<s
 			maxsum = sumAT; 
 		else
 			maxsum = sumCG; 
-		std::cout << "Maxsum is: " << maxsum << std::endl; 
+		//std::cout << "Maxsum is: " << maxsum << std::endl; 
 		pj = maxsum/(double)ChromID.size(); 
-		std::cout << "pj is: " << pj<< std::endl;
+		//std::cout << "pj is: " << pj<< std::endl;
 		SNPsums[i] = 2*pj*(1-pj);
 	}
-	std::cout << std::endl << "Selected SNP id is " << SelectedSNPID << " || Selected allele is in " << selall << " extant indivs" << std::endl;
+	//std::cout << std::endl << "Selected SNP id is " << SelectedSNPID << " || Selected allele is in " << selall << " extant indivs" << std::endl;
 	double pundersel = (double)selall/(double)ChromID.size();
 	double sum_of_elems = 0.0;
 	for(std::vector<double>::iterator it = SNPsums.begin(); it != SNPsums.end(); ++it){
 		sum_of_elems += *it;
-		std::cout << *it << " "; 
+		//std::cout << *it << " "; 
 	}
 	std::cout << std::endl;
 

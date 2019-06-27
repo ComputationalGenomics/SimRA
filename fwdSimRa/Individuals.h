@@ -1,8 +1,8 @@
 /*
 
-fwdSimRA: A framework for selection forward-in-time with Recombination 
+SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
-Last Update: 11/04/2018
+Last Update: 08/11/2016
 
 This is a class where everything that relates to one run of a generation is generated and kept
 It contains the Chromosome Containers for male and female which is referred to while selecting the parents for each individuals
@@ -71,7 +71,7 @@ class Individuals
 		void DisplayParentList(); 
 		void FitnessON(int x);
 		void PopulateEFT(std::vector<int> x, double s1, double s2); 
-
+		void PopulateFT(std::vector<int> x);
 		//This method mutates the SNPs according to mutation rate
 		std::pair<std::vector<string>, int > Mutate(std::vector<string> x,double y, int L);
 		//This fetches the List element containing parent chromosome info for each individual in the last generation

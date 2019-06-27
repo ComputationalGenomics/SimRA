@@ -1,8 +1,8 @@
 /*
 
-fwdSimRA: A framework for selection forward-in-time with Recombination 
+SSimRA: A framework for selection in coalescence with Recombination 
 Author: Aritra Bose 
-Last Update: 11/04/2018
+Last Update: 08/25/2017
 
 This is the implementation of the Individuals class where everything that relates to one run of a generation is generated and kept
 It contains the Chromosome Containers for male and female which is referred to while selecting the parents for each individuals
@@ -125,10 +125,9 @@ std::vector<int> Individuals :: GetLocSegment(int NumberofSNPs,int L){
 */
 void Individuals::PopulateEFT(std::vector<int> epiid, double s1, double s2){
 	
-
-	std::vector<double> fitarr1(diploidSize); 
+	/* std::vector<double> fitarr1(diploidSize); 
 	std::vector<double> fitarr2(diploidSize);
-
+	
 	for (int i = 0; i < diploidSize; i++){
 		std::string targetdiploid = diploidVec[i]; 
 		if(targetdiploid[0] == 'A' || targetdiploid[0] != 'T'){
@@ -155,6 +154,60 @@ void Individuals::PopulateEFT(std::vector<int> epiid, double s1, double s2){
 	int ct = 0;
 	for(std::vector<std::vector<int>>::iterator it = newSNPs.begin(); it != newSNPs.end(); ++it){
 		if (it->size() > 1){
+			for(std::vector<int>::iterator it1 = epiid.begin(); it1 != epiid.end(); ++it1)
+				if(std::find(it->begin(),it->end(),*it1) != it->end())
+					break;
+			ct++;
+		}
+	}
+	
+	for (int i = 0; i < diploidSize; i++){
+		for (int j = 0; j < diploidSize; j++){
+				EpiFitnessTable[(ct*diploidSize*diploidSize)+(i*j)] = (1+fitarr1[i])*(1+fitarr2[j]); 
+		}
+	}
+	
+	for (int i = 0; i < diploidSize; i++){	
+		for (int j = 0; j < diploidSize; j++){
+				std::cout << EpiFitnessTable[ct*diploidSize*diploidSize + (i*j)] << " | " ;
+			}
+			std::cout << std::endl;
+		}
+	fitarr1.clear();
+	fitarr2.clear(); */
+	std::vector<double> fitarr1(diploidSize); 
+	std::vector<double> fitarr2(diploidSize);
+	
+	/* for (int i = 0; i < diploidSize; i++){
+		fitarr1[i] = s1; 
+		fitarr2[i] = s1+s2;
+	} */
+	for (int i = 0; i < diploidSize; i++){
+		std::string targetdiploid = diploidVec[i]; 
+		if(targetdiploid[0] == 'A' || targetdiploid[0] != 'T'){
+			if(targetdiploid[1] != 'A'|| targetdiploid[1] != 'T'){
+				fitarr1[i] = 2*s1; 
+				fitarr2[i] = 0.0; 
+			}
+			else{
+				fitarr1[i] = s1+s2; 
+				fitarr2[i] = s1+s2; 
+			}
+		}
+		else{
+			if(targetdiploid[1] != 'A' || targetdiploid[1] != 'T'){
+				fitarr1[i] = s1+s2; 
+				fitarr2[i] = s1+s2; 
+			}
+			else{
+				fitarr1[i] = 0.0; 
+				fitarr2[i] = 2*s2;
+			}
+		}
+	}
+	int ct = 0;
+	for(std::vector<std::vector<int>>::iterator it = newSNPs.begin(); it != newSNPs.end(); ++it){
+		if (it->size() > 1){
 			if(*it == epiid){
 				ct++;
 				break;
@@ -164,7 +217,7 @@ void Individuals::PopulateEFT(std::vector<int> epiid, double s1, double s2){
 		}
 	}
 	
-	//std::cout << std::endl << " count was " << ct << std::endl; 
+	std::cout << std::endl << " count was " << ct << std::endl; 
 	for (int i = 0; i < diploidSize; i++){
 		for (int j = 0; j < diploidSize; j++){
 				EpiFitnessTable[(ct*diploidSize*diploidSize)+(i*j)] = ((1+fitarr1[i])*(1+fitarr2[j]))+delta; 
@@ -177,7 +230,79 @@ void Individuals::PopulateEFT(std::vector<int> epiid, double s1, double s2){
 			std::cout << std::endl;
 		}
 }
+void Individuals::PopulateFT(std::vector<int> epiid){
+	std::vector<double> fitarr; 
+	int ct = 0;
+	for(std::vector<std::vector<int>>::iterator it = nSNPs.begin(); it != nSNPs.end(); ++it){
+		if (it->size() > 1){
+			if(*it == epiid){
+				break;
+			}
+			else 
+				ct++;
+		}
+		else
+			ct++;
+	}
+	if (numfit == 1){
+		int snpid = epiid[0]; 
+		for (int i = 0; i < diploidSize; i++) {
+			std::string targetdiploid = diploidVec[i];
+			if (targetdiploid[0] == 'A' || targetdiploid[0] == 'T'){
+				if (targetdiploid[1] == 'A' || targetdiploid[1] == 'T')
+					PopulationFitnessTable[snpid*diploidSize + i] = 2*FitVal[0] + FitVal[0]*FitVal[0]; 
+				else 
+					PopulationFitnessTable[snpid*diploidSize + i] = FitVal[0];
+			}
+			else{
+				if (targetdiploid[1] == 'A' || targetdiploid[1] == 'T')
+					PopulationFitnessTable[snpid*diploidSize + i] = FitVal[0];
+				else
+					PopulationFitnessTable[snpid*diploidSize + i] = 0;
+			}
+		}
+	}
+	else{
+		fitarr.resize(numfit*diploidSize);
+		for (int j = 0; j < numfit; j++){
+			for (int i = 0; i < diploidSize; i++) {
+				std::string targetdiploid = diploidVec[i];
+				if (targetdiploid[0] == 'A' || targetdiploid[0] == 'T'){
+					if (targetdiploid[1] == 'A' || targetdiploid[1] == 'T')
+						fitarr[j*diploidSize + i] = 2*FitVal[j]; 
+					else 
+						fitarr[j*diploidSize + i] = FitVal[j];
+				}
+				else{
+					if (targetdiploid[1] == 'A' || targetdiploid[1] == 'T')
+						fitarr[j*diploidSize + i] = FitVal[j];
+					else
+						fitarr[j*diploidSize + i] = 0;
+				}
+			}
+		}
+		if (numfit == 2){
+			for ( int i = 0; i < diploidSize; i++){
+				for (int j = 0; j < diploidSize; j++){
+					PopulationFitnessTable[ct*pow(diploidSize,numfit) + i*diploidSize + j] 
+						= (1+fitarr[i])*(1+fitarr[diploidSize + j]) + delta;
+				}
+			}
+		}
+		else if(numfit == 3){
+			for ( int i = 0; i < diploidSize; i++){
+				for (int j = 0; j < diploidSize; j++){
+					for (int k = 0; k < diploidSize; k++){
+					PopulationFitnessTable[ct*pow(diploidSize,numfit) + i*pow(diploidSize,numfit-1) + j*diploidSize + k] 
+						= (1+fitarr[i])*(1+fitarr[diploidSize + j])*(1+fitarr[diploidSize*(numfit-1) + k]) + delta;
+					}
+				}
+			}
+		}
+	}
 
+	
+}
 void Individuals::FitnessON(int SelectedSNPID){
 	//double *PopulationFitnessTable = new double[numberofSNPs*diploidSize];	
 	std::cout << std::endl << "Putting Fitness ON" << std::endl;
@@ -191,13 +316,18 @@ void Individuals::FitnessON(int SelectedSNPID){
 		std::size_t ct = std::count(targetdiploid.begin(),targetdiploid.end(),'T');
 		//std::cout << std::endl << targetdiploid << " SelectedSNPID: " << SelectedSNPID << std::endl;
 		if (ct == 2)
-			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 2*FITNESS;
+			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 2*FITNESS + FITNESS*FITNESS;
 		else if (ct == 1)
 			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = FITNESS; 
 		else 
 			PopulationFitnessTable[SelectedSNPID*diploidSize+j] = 0.0;	
 	}
-	
+	/*for (int i = 0; i < numberofSNPs; i++){	
+		for (int j = 0; j < diploidSize; j++){
+				std::cout << PopulationFitnessTable[i*diploidSize + j] << " | " ;
+			}
+			std::cout << std::endl;
+		}*/
 		std::cout << std::endl << "Done with fitness" << std::endl;
 }
 		
@@ -235,7 +365,7 @@ int Individuals :: getPosAllele(std::vector<string> Retrievedpair){
 //This also saves the SNPs before and after mutations, helping us track while building the ARGs
 
 std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> haploids, double MutationRate, int L){
-
+	
 	int numSNP = haploids.size();
 	int mutidx; 
 	string targetallele;
@@ -255,8 +385,11 @@ std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> h
 		for (int z = 0; z < numSNP; z++) 
 			RandNumbers[z] = z; 
 	    double scaledMutRate = MutationRate*(double)L;
+		//std::cout << std::endl << "scaledMutRate is " << scaledMutRate << std::endl;
 		unsigned int SNPsToMutate = gsl_ran_poisson(threadvec[omp_get_thread_num()],scaledMutRate);
-		//std::cout << std::endl << "Number of SNPs to Mutate is " << SNPsToMutate << std::endl;
+		
+		//if (SNPsToMutate > 0)
+		//	std::cout << std::endl << "Number of SNPs to Mutate is " << SNPsToMutate << std::endl;
 		
 		int *MutateLocs= new int[SNPsToMutate];
 
@@ -273,12 +406,13 @@ std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> h
 		for (int z = 0; z < SNPsToMutate; z++){
 			//#pragma omp critical
 			if(flagmut == 0){
-				if((EpiFit2 + EpiFit1) !=0){
+				std::cout << std::endl << " In mutation " << std::endl;
+				//if (epiflag > 0){
 					std::vector<int> MutLocs(MutateLocs,MutateLocs+SNPsToMutate);
 					std::vector<int> tmpmutloc = MutLocs; 
 					int ct = 0; 
 					std::vector<int> tmpid; 
-					for(std::vector<std::vector<int>>::iterator it = newSNPs.begin(); it != newSNPs.end(); ++it){					
+					for(std::vector<std::vector<int>>::iterator it = nSNPs.begin(); it != nSNPs.end(); ++it){					
 						if(std::find(it->begin(),it->end(),MutateLocs[z]) != it->end()){
 							tmpid = *it;
 							tmpmutloc.erase(tmpmutloc.begin()+z);
@@ -288,39 +422,45 @@ std::pair<std::vector<string>, int > Individuals :: Mutate(std::vector<string> h
 					for (int ml = 0; ml < tmpid.size(); ml++)
 						std::cout << " " << tmpid[ml]; 				
 					std::cout << std::endl; 
-					for (int ml = 0; ml < tmpid.size(); ml++){
+					PopulateFT(tmpid);
+					/*for (int ml = 0; ml < tmpid.size(); ml++){
 						if(std::find(MutLocs.begin(), MutLocs.end(), tmpid[ml]) != MutLocs.end()){
 							ct++;
 						}
 					}
-					if(tmpid.size() > 1){
+						PopulateEFT(tmpid,);
 						if(ct == 2)
-						PopulateEFT(tmpid,EpiFit1,EpiFit2);
+						PopulateEFT(tmpid,EpiFit1);
 						else if(ct == 1){
 							double r = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
 							if (r < 0.5)
-								PopulateEFT(tmpid,EpiFit1,0.0);
+								PopulateEFT(tmpid,EpiFit1);
 							else
-								PopulateEFT(tmpid,0.0,EpiFit2);
+								PopulateEFT(tmpid,EpiFit2);
 						}
-					} 
+					}
+					else if(tmpid.size() > 1 && epiflag == 1){
+						FitnessON(tmpid[0]);
+						FitnessON(tmpid[1]);
+					}
 					else{
 						SelectedSNPID = MutateLocs[0];
 						FitnessON(SelectedSNPID);
-					}
+					}*/
 					//std::cout << std::endl << "Updated at " << SelectedSNPID << std::endl;
 					flagmut = 1;
 					MutLocs.clear(); 
 					tmpid.clear();
 					tmpmutloc.clear();
 					std::cout << std::endl << "signing off " << std::endl;
-				}
-				else{
-					SelectedSNPID = MutateLocs[z];
-					FitnessON(SelectedSNPID);
+					
+				//}
+				//else{
+					//SelectedSNPID = MutateLocs[z];
+					//FitnessON(SelectedSNPID);
 					//std::cout << std::endl << "Updated at " << SelectedSNPID << std::endl;
 					flagmut = 1;
-				}
+				//}
 			}
 			
 			targetallele = mutatedhaploids[RandNumbers[z]];
