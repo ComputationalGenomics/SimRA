@@ -5,17 +5,17 @@ coalescence and recombinations with SNPs. This also takes into account the event
 
 It has been developed in C++ with the requirement of GSL and Openmp libraries. 
 
-#Pre-requisites
+# Pre-requisites
 
  - C++ version 11 or later. 
  - GSL and Openmp libraries
  
-#Get Started
+# Get Started
 ```sh
 git clone git://github.com/ComputationalGenomics/SimRA
 ```
 
-#Executable 
+# Executable 
 
 You can recompile the fwdSimRA files using the following command 
 ```
