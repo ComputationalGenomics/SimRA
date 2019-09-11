@@ -1,41 +1,13 @@
-/*
-  Copyright 2015 IBM Corporation
-
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
-
-You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under 
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF 
-ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and limitations under the License.
-
-
-*/
-
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-/**
- * The class MergeIntervals is useful to do some operations on objects of the class Interval, such as the merge of two objects of Intervals
- * @see Interval
- */
 public class MergeIntervals{
-/**
- * 	
- */
+	
 public MergeIntervals(){
 	
 }
 	
-/**
- * This function takes in input a list of objects of the class Interval and merge them ordering them in case there are holes between intervals
- * @param intervals a list of object of the class Interval that has to be merged and ordered
- * @return an ArrayList of objects of the class Interval that have been merged and ordered
- */
 public ArrayList<Interval> merge(ArrayList<Interval> intervals) {
         
         if(intervals.size() == 0)
@@ -70,10 +42,7 @@ public ArrayList<Interval> merge(ArrayList<Interval> intervals) {
         return result;
         
     }
-/**
- * This procedure prints the list of objects of the class Interval 
- * @param l ArrayList of objects of the class Interval to be print
- */
+
 public static void printListIntervals(ArrayList<Interval> l){
 	
 	for(int i = 0; i < l.size(); i++ ) {
@@ -82,11 +51,6 @@ public static void printListIntervals(ArrayList<Interval> l){
 	
 }
 
-/**
- * This procedure creates and returns a String representing a list of Interval objects
- * @param l is an ArrayList of objects of the class Interval
- * @return a String object representing the list of Interval objects
- */
 public static String intervalList(ArrayList<Interval> l){
 	
 	String segms = new String("");
@@ -106,10 +70,6 @@ public static String intervalList(ArrayList<Interval> l){
 	
 }
 
-/**
- * 
- *
- */
 class IntervalComparator implements Comparator<Interval>{
     public int compare(Interval o1, Interval o2){
         int r = 0;        
@@ -121,12 +81,6 @@ class IntervalComparator implements Comparator<Interval>{
     }
 }
 
-/**
- * This function connects two list of Interval objects of the class Interval
- * @param l ArrayList of Interval objects that will be precede the other list 
- * @param r ArrayList of Interval objects that will be follow the other list 
- * @return the ArrayList of Interval object resulting from the concatenation of two lists
- */
 public ArrayList<Interval> ConcatTwoIntervalList(ArrayList<Interval> l, ArrayList<Interval> r) {
 	
 	ArrayList<Interval> ris = new ArrayList<Interval>();
@@ -142,5 +96,7 @@ public ArrayList<Interval> ConcatTwoIntervalList(ArrayList<Interval> l, ArrayLis
 	return ris;
 }
 
+
 }
+
 

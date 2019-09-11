@@ -1,45 +1,15 @@
-/*
-  Copyright 2015 IBM Corporation
-
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
-
-You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under 
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF 
-ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and limitations under the License.
-
-
-*/
-
-
 import java.util.ArrayList;
 
-/**
- * The class SplittingIntervals contains the function that splits a segment (composed by a list on Interval objects) in two parts due to
- * a recombination event 
- * @author Anna Paola Carrieri
- *
- */
+
 public class SplittingIntervals {
+
+	private static double rec_pos;
 	
-	/**
-	 *  default constructor
-	 * 
-	 */
 	public SplittingIntervals(){
 		
 	}
-	/**
-	 * This function splits a list of Interval objects in two parts based on the split point. The split point is generated when a recombination event occurs
-	 * @param input ArrayList of Interval objects to be split
-	 * @param recombID ID of the recombination node 
-	 * @param arg PopulationARG object containing the node of which the genetic material (list of Intervals) has to be split
-	 * @return two ArraLists of lists of Intervals representing the two parts in which the original list has been split
-	 */
-	public static ArrayList<ArrayList<Interval>> split(ArrayList<Interval> input, int recombID, PopulationARG arg){
+	
+	public static ArrayList<ArrayList<Interval>> split(ArrayList<Interval> input, int recombID){
 		
 		ArrayList<Interval> l = new ArrayList<Interval>();
 		ArrayList<Interval> r = new ArrayList<Interval>();
@@ -49,10 +19,12 @@ public class SplittingIntervals {
 		double rangeMin = input.get(0).getStart();
 		double rangeMax = input.get(input.size()-1).getEnd();
 		double x = rangeMin + (rangeMax - rangeMin) * Math.random();
-	
+		
+		rec_pos=x;
+		
 		//Store the split point in the node
-		arg.getNodeSet().get(recombID).setSplitPoint(x);
-		arg.getSplitPoints().add(x);
+		GenerateARG.getNodeSet().get(recombID).setSplitPoint(x);
+		GenerateARG.getSplitPoints().add(x);
 		
 		if(x == input.get(0).getStart() || x == input.get(input.size()-1).getEnd()){
 			
@@ -117,4 +89,9 @@ public class SplittingIntervals {
 		return ris;
 	}
 
+	public static double getRec_pos() {
+		return rec_pos;
+	}
+	
+	
 }

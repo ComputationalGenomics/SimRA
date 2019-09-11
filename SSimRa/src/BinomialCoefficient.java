@@ -1,20 +1,6 @@
-/*
-  Copyright 2015 IBM Corporation
-
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
-
-You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under 
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF 
-ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and limitations under the License.
-*/
 
 /**
  * The class BinomialCoefficient compute the binomial coefficient (n r)
- * 
  * @author Anna Paola Carrieri
  *
  */
@@ -25,9 +11,9 @@ public class BinomialCoefficient {
 		}
 		/**
 		  * Function that returns the binomial coefficient (n r)
-		  * @param n  number of elements in the set X
-		  * @param k number of elements in each subset of X
-		  * @return binomial coefficient, that is the number of distinct k-elements subsets of X
+		  * @param n integer value = number of elements in the set X
+		  * @param r integer value = number of elements in each subset of X
+		  * @return binomial coefficient = number of distinct k-elements subsets of X
 		 */
 		public static long binomialCoeff(int n, int k)
 		{
@@ -52,12 +38,6 @@ public class BinomialCoefficient {
 		    return C[n][k];
 		}
 		
-		/**
-		 * The function returns the minimum value between two integer values
-		 * @param a integer 
-		 * @param b integer
-		 * @return the minimum value between the parameters a and b
-		 */
 		public static int min(int a, int b)
 		{
 		    return (a<b)? a: b;
