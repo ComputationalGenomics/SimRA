@@ -147,19 +147,19 @@ public class Utilities {
 	 * @param pop object of PopulationARG
 	 * @see PopulationARG class
 	 */
-	public static void printMutationsForLeaf(PopulationARG pop){
+	/*public static void printMutationsForLeaf(PopulationARG pop){
 		
 		for(int i = 0; i < pop.getExtantUnits(); i++){
-			TreeSet<Double> muts = pop.getNodeSet().get(i).getMutation_set();
+			//TreeSet<Double> muts = pop.getNodeSet().get(i).getMutation_set();
 			System.out.println("EXTANT UNIT "+i);
-			System.out.println("Number of mutations : "+muts.size());
+			//System.out.println("Number of mutations : "+muts.size());
 			System.out.println("List of mutations :");
-			Iterator<Double> muts_it = muts.iterator();
+			//Iterator<Double> muts_it = muts.iterator();
 			while(muts_it.hasNext()){
 				System.out.println(muts_it.next());
 			}
 		}
-	}
+	}*/
 	
 	/**
 	 * This procedure prints the list of all mutations in one ARG
@@ -172,7 +172,7 @@ public class Utilities {
 		while(it_muts.hasNext()){
 			Double id_mut = it_muts.next();
 			Mutation mut = muts.get(id_mut);
-			mut.printMutation();
+			//mut.printMutation();
 		}
 		
 	}

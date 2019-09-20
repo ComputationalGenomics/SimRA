@@ -1,7 +1,5 @@
 # Backward Simulation based on Random-graph Algorithms
-SimRA (**Sim**ulation based on **R**andom-graphs **A**lgorithms) is a framework for simulating generic and complex evolutionary scenarios of multiple populations with subdivision and admixture. 
-The algorithm generates a network structure, called Ancestral Recombination Graph (ARG), that models coalescence and genetic exchange events (recombinations) with SNPs. They support epistatic interactions 
-between at most three loci at a time with user defined parameters. 
+SimRA (**Sim**ulation based on **R**andom-graphs **A**lgorithms) is a framework for simulating generic and complex evolutionary scenarios of multiple populations with subdivision and admixture. The algorithm generates a network structure, called Ancestral Recombination Graph (ARG), that models coalescence and genetic exchange events (recombinations) with SNP as well as STR polymorphisms.
 
 It has been developed in Java under the Eclipse Framework
 
@@ -33,46 +31,45 @@ Here we provide a short description on how to use it. For a more completed infor
 ## How to run?
 
 ```sh
-$ java -jar SimRa.jar [N] [r] [mu] [g] [iter] [eflag] [m] [s]
-                 
-
- EXAMPLE:
-         java -jar SimRa.jar -N 10000 -r 0 -mu 1 -g 25 -m 10 20 30 40 -eflag 1 -s 0.3 0.3 0.3
-
- Above example is with selection on three loci and 4 randomly sampled extant units;
-
- As epistatic flag (eflag) is SET in the above example you need to provide four epistatic interaction coefficients less than s;
+$ java -jar SimRA.jar <whole path input directory> <name input file>.txt
+<whole path output directory> <name output file> [-STR <STRs number> <state> <muSTR>]
 ```
 
 ### Required parameters
 
 ```sh
-- N : integer representing the population size
-- r : double representing the recombination rate in cM/Mb/gen
-- mu : double representing the mutation rate in  mut/bp/gen x 10^(-8)
-- g : integer representing the segment length in Kb
-- iter : Number of iterations
-- eflag : Epistatic interaction flag
-- m : array of integers less than N/2 representing the extant sample size
-- s : array of doubles representing selection coefficient at each loci
+- <whole path input directory>: whole path of the directory when the input file is stored;
+- <name input file>.txt: name for the input file that has to have a ".txt" extension;
+- <whole path output directory>: whole path of the directory when the output files will be saved.
+The output directory must be created by the user before executing SimRA;
+- <name output file>: name for the output text files without extension;
 ```
 
-The parameter `s` when set to 0 executes the neutral case when there is no selection is in effect. It supports up 
-to three-way epistatic interactions now with user defined values provided in the `s` parameter as shown in the example above. 
+### Optional parameters
+
+```sh
+- STR: it allows to get an output le containing information about STR polymorphisms;
+- STRs number: number of STR loci - integer;
+- state: initial state for each STR locus - integer;
+- muSTR: STR mutation rate in mut/locus/gen x 10^(-4) - non negative real number;
+```
 
 ## Example
-To execute sSimRA.jar it is necessary to reach the directory where the sSimRA.jar is located. 
-Please refer to the example provided above to execute sSimRA.jar.
+To execute SimRA.jar it is necessary to reach the directory where the SimRA.jar is located. Some examples of command lines to execute SimRA.jar are the following:
 
+### Without STR polymorphisms generation :
+```sh
+java -jar SimRA.jar ./scaffold_2admix.txt ./output scaffold_2admix
+```
+This command line allows to save the output files in the same directory where the executable SimRA.jar is located. In this case the input file is located in the same directory of SimRA.jar.
 
-## Output
+### With STR polymorphisms generation:
 
-sSimRA generates a verbose output with stats on the ARG in the stats folder. The main output of ARG height is in
-the text files with the following structure: 
-
-`N~_m~_m0.2_g~_s~_r~.txt` 
-
-More information about the ARG is stored in the files ending with `*STATS.txt`,`*L.txt` and `*S.txt`
+```sh
+java -jar SimRA.jar ~/Desktop/inputSimRA/scaffold_2admix.txt ~/Desktop/outputSimRA/output
+scaffold_2admix -STR 40 10 6.9
+```
+The whole path must be specified if the input/output directories inputSimRA, outputSimRA are located in a different directory of the executable SimRA.jar.
 
 # Contributing
 

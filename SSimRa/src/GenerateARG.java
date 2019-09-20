@@ -657,7 +657,7 @@ public class GenerateARG {
 	public static double FunS(double val) {
 		return ((1+val)/(2+val));
 	}
-	public static void errorInsertingParameters(){
+	/*public static void errorInsertingParameters(){
 		System.out.println("Usage:\n\t java -jar SimRa.jar [N] [m] [r] [mu] [g] [outputDirectory] [fileName]");
 		System.out.println("\t\t N : integer representing the population size;");
 		System.out.println("\t\t m : integer representing the sample size;");
@@ -675,9 +675,24 @@ public class GenerateARG {
 		System.out.println("\n EXAMPLE 1: \n\t java -jar SimRa.jar 10000 200 0.1 0.7 75 output_SimRa/ output1");
 		System.out.println("\n EXAMPLE 2: \n\t java -jar SimRa.jar 10000 200 0.1 0.7 75 output_SimRa/ output2 -STR 15 40 2.0");
 		System.exit(1);
+	}*/
+
+	public static void errorInsertingParameters(){
+		System.out.println("Usage:\n\t java -jar SimRa.jar [N] [r] [mu] [g] [iter] [eflag] [m] [s]");
+		System.out.println("\t\t N : integer representing the population size;");
+		System.out.println("\t\t r : double representing the recombination rate in cM/Mb/gen;");
+		System.out.println("\t\t mu : double representing the mutation rate in  mut/bp/gen x 10^(-8);");
+		System.out.println("\t\t g : integer representing the segment length in Kb");
+		System.out.println("\t\t iter : Number of iterations;");
+		System.out.println("\t\t eflag : Epistatic interaction flag;"); 
+		System.out.println("\t\t m : array of integers less than N/2 representing the extant sample size;");
+		System.out.println("\t\t s : array of doubles representing selection coefficient at each loci;");
+		System.out.println("\n EXAMPLE: \n\t java -jar SimRa.jar -N 10000 -r 0 -mu 1 -g 25 -m 10 20 30 40 -eflag 1 -s 0.3 0.3 0.3 ");
+		System.out.println("\n Above example is with selection on three loci and 4 randomly sampled extant units; ");
+		System.out.println("\n As epistatic flag (eflag) is SET in the above example you need to provide four epistatic interaction coefficients less than s;");
+		System.exit(1);
 	}
-
-
+	
 	public static void creteDot(String outFileName) throws FileNotFoundException, UnsupportedEncodingException
 	{
 		HashMap<Double,HashSet<Integer>> nodepertime = new HashMap<Double, HashSet<Integer>>();
@@ -1164,11 +1179,7 @@ public class GenerateARG {
         ArrayList<Integer> mvect = new ArrayList<Integer>();
         ArrayList<Integer> gvect =  new ArrayList<Integer>();
         Map<String, List<String>> params = new HashMap<>();
-        
-        if(args.length < 5) {
-			errorInsertingParameters();
-		}
-        
+       
 		Runtime runtime = Runtime.getRuntime();
 		long start = System.currentTimeMillis();
 
@@ -1193,9 +1204,20 @@ public class GenerateARG {
 		        return;
 		    }
 		}
-		
+		 
+        if(params.containsKey("N") && params.containsKey("g") && params.containsKey("mu")
+        		&& params.containsKey("r") && params.containsKey("iter") 
+        		&& params.containsKey("eflag") && params.containsKey("m")
+        		&& params.containsKey("s")) {
+        	System.out.println("All parameters OK.");
+        }
+        else {
+			errorInsertingParameters();
+		}
+        
+
 		//System.out.println(params.get("N").get(0));
-		argN = Integer.parseInt(params.get("N").get(0));
+        argN = Integer.parseInt(params.get("N").get(0));
 		argRecomb = Double.parseDouble(params.get("r").get(0));
 		argMut = Double.parseDouble(params.get("mu").get(0));
 		runs = Integer.parseInt(params.get("iter").get(0));

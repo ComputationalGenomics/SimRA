@@ -714,8 +714,8 @@ public void generateCoalescentPopulation(int id, PopulationARG pop1, PopulationA
 			e.setRate(act_e.getRate());
 			e.setSegments(act_e.getSegments());
 			e.setDensity(act_e.getDensity());
-			e.setTime(act_e.getTime());
-			
+			//e.setTime(act_e.getTime());
+			e.setTime();
 			activeEdges.add(id_edge);
 			graphEdges.put(id_edge, e);
 			id_edge++;
@@ -763,8 +763,8 @@ public void generateCoalescentPopulation(int id, PopulationARG pop1, PopulationA
 			e.setRate(act_e.getRate());
 			e.setSegments(act_e.getSegments());
 			e.setDensity(act_e.getDensity());
-			e.setTime(act_e.getTime());
-			
+			//e.setTime(act_e.getTime());
+			e.setTime();
 			activeEdges.add(id_edge);
 			graphEdges.put(id_edge, e);
 			id_edge++;
@@ -876,8 +876,8 @@ public void generatePopulationFromSplitting(int id, PopulationARG pop, ArrayList
 		e.setRate(act_e.getRate());
 		e.setSegments(act_e.getSegments());
 		e.setDensity(act_e.getDensity());
-		e.setTime(act_e.getTime());
-		
+		//e.setTime(act_e.getTime());
+		e.setTime();
 		activeEdges.add(id_edge);
 		graphEdges.put(id_edge, e);
 		id_edge++;
@@ -970,7 +970,7 @@ public void generatePopulationFromSplitting(int id, PopulationARG pop, ArrayList
 					//Set the father of the active edge selected
 					graphEdges.get(id_first_edge).setId_fath(coal_node.getId());
 					//Set the time passed for this event (computed by the exponential distribution)
-					graphEdges.get(id_first_edge).setTime(nodeSet.get(coal_node.getId()).getLevel()-nodeSet.get(son1).getLevel());
+					//graphEdges.get(id_first_edge).setTime(nodeSet.get(coal_node.getId()).getLevel()-nodeSet.get(son1).getLevel());
 					
 					
 					//Get the arraylist of Intervals/Segments of the left edge
@@ -988,7 +988,7 @@ public void generatePopulationFromSplitting(int id, PopulationARG pop, ArrayList
 					//Set the father of the selected active lineage as coalescent node
 					graphEdges.get(id_second_edge).setId_fath(coal_node.getId());
 					//Set the time passed for this event (computed by the exponential distribution)
-					graphEdges.get(id_second_edge).setTime(nodeSet.get(coal_node.getId()).getLevel()-nodeSet.get(son2).getLevel());
+					//graphEdges.get(id_second_edge).setTime(nodeSet.get(coal_node.getId()).getLevel()-nodeSet.get(son2).getLevel());
 					
 					//Get the arraylist of Intervals/Segments of the right edge
 					ArrayList<Interval> right_segments = graphEdges.get(activeEdges.get(j)).getSegments();
@@ -1033,7 +1033,7 @@ public void generatePopulationFromSplitting(int id, PopulationARG pop, ArrayList
 					
 					//Set the time computed by exponential distribution
 					int son = graphEdges.get(id_edge).getId_son();
-					graphEdges.get(id_edge).setTime(nodeSet.get(recomb_node.getId()).getLevel()-nodeSet.get(son).getLevel());
+					//graphEdges.get(id_edge).setTime(nodeSet.get(recomb_node.getId()).getLevel()-nodeSet.get(son).getLevel());
 					
 					//Set the list of solid intervals
 					recomb_node.setSegments(graphEdges.get(activeEdges.get(index-1)).getSegments());
@@ -1043,7 +1043,7 @@ public void generatePopulationFromSplitting(int id, PopulationARG pop, ArrayList
 					activeEdges.remove(index-1);
 					
 					//Create two new active edges that have as son the new recombination node
-					ArrayList<ArrayList<Interval>> splitted = SplittingIntervals.split(recomb_node.getSegments(), recomb_node.getId(), this);
+					/*ArrayList<ArrayList<Interval>> splitted = SplittingIntervals.split(recomb_node.getSegments(), recomb_node.getId(), this);
 					Edge left_edge = new Edge(graphEdges.size(), recomb_node.getId(), -1, splitted.get(0));
 					left_edge.computeLength();
 					left_edge.computeRate(getN(), getRecomb(), getG());
@@ -1054,7 +1054,7 @@ public void generatePopulationFromSplitting(int id, PopulationARG pop, ArrayList
 					right_edge.computeLength();
 					right_edge.computeRate(getN(), getRecomb(), getG());
 					graphEdges.put(right_edge.getIdEDGE(), right_edge);
-					activeEdges.add(right_edge.getIdEDGE());		
+					activeEdges.add(right_edge.getIdEDGE());*/		
 				}
 				
 				//update L
