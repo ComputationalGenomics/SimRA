@@ -19,7 +19,7 @@ git clone git://github.com/ComputationalGenomics/SimRA
 
 You can recompile the fwdSimRA files using the following command 
 ```
-g++ -std=c++11 fwdSSimRA.cpp Individuals.cpp GlobalIndivs.cpp Events.cpp ChrInfo.cpp -o fwdSimRA -lgsl -fopenmp 
+g++ -std=c++11 fwdSimRA.cpp Individuals.cpp GlobalIndivs.cpp Events.cpp ChrInfo.cpp -o fwdSimRA -lgsl -fopenmp 
 ```
 Some compilers might abort with an error about CBLAS linkage unavailability. In that case, use the extra -lgslcblas flag along with others. 
 
