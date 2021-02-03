@@ -28,7 +28,7 @@ A.P. Carrieri, F. Utro, L. Parida. Sampling ARG of multiple populations under co
 
 if you use EpiSimRA, please cite: 
 
-A. Bose, F. Utro, D.E. Platt, L.Parida. Multiple Loci Selection with Multi-way Epistasis in Coalescence with Recombinations. 2020
+A. Bose, F. Utro, D.E. Platt, L.Parida. Multiway epistasis simulations for ARG sampling of multiple populations. (Submitted)
 # Executable
 
 For convenience, we also provide a precompiled version of SimRA usable via command line that you can download from the [binary folder](https://github.com/ComputationalGenomics/SimRA/tree/master/binary). 
