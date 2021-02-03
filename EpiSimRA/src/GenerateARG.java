@@ -29,13 +29,13 @@ import java.util.Iterator;
 
 
 /**
- * Main class of SimRa.
+ * Main class of EpiSimRA.
  * Generates the ARG randomly and then decorates it with SNP mutations and (optionally) STRs mutations.
- * 
+ * @author Aritra Bose
  * @author Anna Paola Carrieri
  * @author Filippo Utro
- * @author Aritra Bose
- * @version August 1, 2018.
+ *
+ * @version Feb 4, 2021.
  */
 
 public class GenerateARG {
@@ -1186,13 +1186,13 @@ public class GenerateARG {
 		List<String> options = null;
 		for (int i = 0; i < args.length; i++) {
 		    final String cmds = args[i];
-
+                    //System.out.println(options);
 		    if (cmds.charAt(0) == '-') {
 		        if (cmds.length() < 1) {
 		            System.err.println("Error at argument " + cmds);
 		            return;
 		        }
-
+                        //System.out.println("cmds: "+ cmds.substring(1)); 
 		        options = new ArrayList<>();
 		        params.put(cmds.substring(1), options);
 		    }
@@ -1204,7 +1204,7 @@ public class GenerateARG {
 		        return;
 		    }
 		}
-		 
+	System.out.println(params); 
         if(params.containsKey("N") && params.containsKey("g") && params.containsKey("mu")
         		&& params.containsKey("r") && params.containsKey("iter") 
         		&& params.containsKey("eflag") && params.containsKey("m")
@@ -1322,7 +1322,7 @@ public class GenerateARG {
 				//argRecomb = 1;
 				//argMut = 1.5;
 				argG = gvect.get(indg);
-				argPath = "";
+				argPath = "stats/";
 				argFileName = "prova";
 
 				//compute number of extant unit under selection;

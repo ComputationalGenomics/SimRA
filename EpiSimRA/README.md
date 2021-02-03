@@ -17,6 +17,8 @@ git clone git://github.com/ComputationalGenomics/SimRA
 ```
 
 or you may want directly import the project on Eclipse (please see this [wiki](https://github.com/OneBusAway/onebusaway/wiki/Importing-source-code-into-Eclipse)). 
+The jar file EpiSimRA.jar is in the subfolder called "binary".
+
 
 # Citation
 
@@ -24,6 +26,9 @@ Please cite the following article if you use SimRA in your research:
 
 A.P. Carrieri, F. Utro, L. Parida. Sampling ARG of multiple populations under complex configurations of subdivision and admixture. Bioinformatics, 2015.
 
+if you use EpiSimRA, please cite: 
+
+A. Bose, F. Utro, D.E. Platt, L.Parida. Multiple Loci Selection with Multi-way Epistasis in Coalescence with Recombinations. 2020
 # Executable
 
 For convenience, we also provide a precompiled version of SimRA usable via command line that you can download from the [binary folder](https://github.com/ComputationalGenomics/SimRA/tree/master/binary). 
@@ -33,11 +38,11 @@ Here we provide a short description on how to use it. For a more completed infor
 ## How to run?
 
 ```sh
-$ java -jar SimRa.jar [N] [r] [mu] [g] [iter] [eflag] [m] [s]
+$ java -jar EpiSimRa.jar [N] [r] [mu] [g] [iter] [eflag] [m] [s] [iter]
                  
 
  EXAMPLE:
-         java -jar SimRa.jar -N 10000 -r 0 -mu 1 -g 25 -m 10 20 30 40 -eflag 1 -s 0.3 0.3 0.3
+         java -jar EpiSimRa.jar -N 10000 -r 0 -mu 1 -g 25 -m 10 20 30 40 -eflag 1 -s 0.3 0.3 0.3 -iter 100
 
  Above example is with selection on three loci and 4 randomly sampled extant units;
 
@@ -55,6 +60,7 @@ $ java -jar SimRa.jar [N] [r] [mu] [g] [iter] [eflag] [m] [s]
 - eflag : Epistatic interaction flag
 - m : array of integers less than N/2 representing the extant sample size
 - s : array of doubles representing selection coefficient at each loci
+- iter : number of iterations of the whole experiment
 ```
 
 The parameter `s` when set to 0 executes the neutral case when there is no selection is in effect. It supports up 
