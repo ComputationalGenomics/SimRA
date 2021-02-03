@@ -15,7 +15,7 @@ git clone git://github.com/ComputationalGenomics/SimRA
 
 Please cite the following article if you use sSimRA (backwards or forward) in your research:
 
-A. Bose, F. Utro, D. Platt, L. Parida. sSimRA: multiple loci selection with multiway epistasis in coalescence with recombinations. (submitted)
+A. Bose, F. Utro, D. Platt, L. Parida. Multiway epistasis simulations for ARG sampling of multiple populations. (submitted)
 
 and/or (for the neutral scenario): 
 
