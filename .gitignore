@@ -2,3 +2,10 @@
 coverage.xml
 unittests.xml
 .coverage
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Sphinx documentation
+docs/_build/
