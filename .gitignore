@@ -6,6 +6,7 @@ unittests.xml
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+tests/__pycache__/
 
 # Sphinx documentation
 docs/_build/
