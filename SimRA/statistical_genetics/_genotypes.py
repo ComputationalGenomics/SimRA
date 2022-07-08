@@ -3,7 +3,7 @@ import pandas as pd
 import random
 import datetime
 
-def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed=None) :
+def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None) :
     """Simulate model bn.
         Parameters
         ----------
@@ -13,16 +13,16 @@ def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed=None) :
             Number of SNPs
         n_indiv : int
             Number of individuals.
-        frq : int
-            frequency of that SNP in the data
-        fst : float
+        frq : array
+            frequency/proportion of that SNP in the data
+        fst : array
             percentage of contribution to the total generic variation in each SNP
         seed : int
             Uses datetime if nothing is provided
             Randomizes generation.
         Returns
         -------
-        pop_matrix : array
+        pop_matrix : ndarray
             Individual population adimixture matrix.
         pop_idx : array
             Population adimixture matrix.
