@@ -40,7 +40,7 @@ def simulate(v_noise, k, Pn, Vn, N, prop1, div=2, seed=0):
         varlist.append(arr)
 
     varmat = np.vstack(varlist)
-    print(varmat)
+    # print(varmat)
 
     propK = np.array(list(k[0]*np.ones(div)) + list(k[1]*np.ones(Pn-div)))
     # print(propK)
