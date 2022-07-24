@@ -70,3 +70,48 @@ def simulate(v_noise, k, Pn, Vn, N, prop1, div=2, seed=0):
 
         phenodict[tuple(randidx)] = pheno
     return phenodict, varmat
+
+def generate(Vn, Pn, varmat, phenodict):
+    """
+    Names the variables generated in the simulate function and converts the dictionary of phenotypes into a dataframe.
+    Writes the dataframes to an excel file.
+
+    Parameters
+    ----------
+    Pn: int 
+        The number of phenotypes
+    Vn: int
+        The number of variables
+    varmat: array
+        Matrix of random variables
+    phenodict: dictionary
+        Contributing variables mapped to each phenotype
+    """
+    # name variables
+    varlist = ['var'+str(i) for i in range(0, Vn)]
+    phenolist = ['pheno'+str(i) for i in range(0, Pn)]
+
+    Vdf = pd.DataFrame(varmat.T, columns=varlist)
+
+    Pdf = pd.DataFrame.from_dict(phenodict)
+    Pdf.columns = phenolist
+
+    SimDF = pd.concat([Pdf, Vdf], axis=1)
+
+    # convert phenodict into dataframe
+    idx = 0
+    mapping = {}
+    for key in phenodict.keys():
+        varkey = [varlist[j] for j in key]
+        mapping[phenolist[idx]] = [varkey]
+        idx += 1
+
+    mapDF = pd.DataFrame.from_dict(mapping).T
+    mapDF.columns = ['Contributing Variables']
+
+    dirpath = sys.path[0]
+    outfname = dirpath+"/Sim_eps"+str(v)+"_k"+str(k)+"_And.xlsx"
+
+    with pd.ExcelWriter(outfname) as writer:
+        SimDF.to_excel(writer, sheet_name='Data')
+        mapDF.to_excel(writer, sheet_name='Mapping')
