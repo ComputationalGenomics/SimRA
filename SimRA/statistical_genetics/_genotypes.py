@@ -3,7 +3,7 @@ import pandas as pd
 import random
 import datetime
 
-def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None) :
+def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None):
     """Simulate model bn.
         Parameters
         ----------
@@ -14,18 +14,20 @@ def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None) :
         n_indiv : int
             Number of individuals.
         frq : array
-            frequency/proportion of that SNP in the data
+            frequency/proportion of a specific SNP in the data
         fst : array
-            percentage of contribution to the total generic variation in each SNP
+            percentage of contribution to the total generic variation from each SNP
         seed : int
             Uses datetime if nothing is provided
             Randomizes generation.
         Returns
         -------
-        pop_matrix : ndarray
+        pop_matrix : 2d data array
             Individual population adimixture matrix.
         pop_idx : array
             Population adimixture matrix.
+        genetic_matrix : 2d data array
+            Genetic data matrix. 
 
     """
     
@@ -53,7 +55,7 @@ def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None) :
     #
     # % allele freq of population: allele freq of each SNP described by that
     # % population
-    gamma = np.zeros((n_snp,n_pop)); #allele freq for each population
+    genetic_matrix = np.zeros((n_snp,n_pop)); #allele freq for each population
     
     # % columns of S will be populated with indicator vectors s.t. each
     # % individual assigned to one of the 3 subpopulations i.e. admixture
@@ -73,7 +75,7 @@ def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None) :
     # % for each SNP...
     for i in range(0,n_snp):
         # each row will generate 'd' variates drawing from this distribution
-        gamma[i,:] = np.random.beta(frq[i]*(1-fst[i])/fst[i], (1-frq[i])*(1-fst[i])/fst[i], size=n_pop)            
+        genetic_matrix[i,:] = np.random.beta(frq[i]*(1-fst[i])/fst[i], (1-frq[i])*(1-fst[i])/fst[i], size=n_pop)            
         
     # print('Mean of allele freq matrix: ', np.mean(G, axis=0))
 
@@ -98,4 +100,4 @@ def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None) :
             
         pop_matrix[pick-1,i] = 1
         # Leaving all other values at zero (indiv only assigned to one subpop)
-    return (pop_matrix, pop_idx)
+    return (pop_matrix, pop_idx, genetic_matrix)
