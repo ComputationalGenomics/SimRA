@@ -5,6 +5,7 @@ import sys
 import math
 import random
 
+
 def simulate(v_noise, k, Pn, Vn, N, prop1, div=2, seed=0):
     """
     Returns a matrix and a dictionary of phenotypes associated to different variables.
@@ -71,6 +72,7 @@ def simulate(v_noise, k, Pn, Vn, N, prop1, div=2, seed=0):
         phenodict[tuple(randidx)] = pheno
     return phenodict, varmat
 
+
 def generate(Vn, Pn, varmat, phenodict):
     """
     Names the variables generated in the simulate function and converts the dictionary of phenotypes into a dataframe.
@@ -115,3 +117,16 @@ def generate(Vn, Pn, varmat, phenodict):
     with pd.ExcelWriter(outfname) as writer:
         SimDF.to_excel(writer, sheet_name='Data')
         mapDF.to_excel(writer, sheet_name='Mapping')
+
+
+def run_simulation(v_noise, k, Pn, Vn, N, prop1, seed):
+    """
+    Allows the use of the simulate and generate function at the same time
+
+    Parameters
+    ----------
+    Same as the simulate() function
+    """
+    phenodict, varmat = simulate(v_noise, k, Pn, Vn, N, prop1, seed)
+    generate(Vn, Pn, varmat, phenodict)
+    return ("End of simulation")
