@@ -6,7 +6,7 @@ from sklearn.cluster import KMeans
 ################################################################################
 ################################################################################
 
-def gen_eff_sim (gtype_matrix, variance_gen, num_snp, num_indiv) :
+def gen_eff (gtype_matrix, variance_gen, num_indiv, num_causal_snp=10) :
     """Simulates genetic effect on each individual's quantitative traits and disease susceptibility.
 
         Parameters
@@ -16,10 +16,10 @@ def gen_eff_sim (gtype_matrix, variance_gen, num_snp, num_indiv) :
         variance_gen : int
             Amount of variance for genetic effect. 
             ***When simulating for all 3 effects, variances for each must sum to 100***
-        num_snp : int
-            Number of SNPs.
         num_indiv : int
             Number of individuals.
+        num_causal_snp : int, default 10
+            Number of causal SNPs. Default is 10.
 
         Returns
         -------
@@ -28,21 +28,15 @@ def gen_eff_sim (gtype_matrix, variance_gen, num_snp, num_indiv) :
 
         See Also
         --------
-        enviro_eff_sim
-        noise_eff_sim
+        enviro_eff
+        noise_eff
     """
 
     variance_gen /= 100.0
 
-    # why isn't this user defined?
-    num_causal_snp = 10
-
     snp_effects = np.random.normal(0,0.5,num_causal_snp)
 
-    # is this necessary because we never calculate for it?
-    snp_effects = np.append(snp_effects,np.zeros((num_snp-num_causal_snp,1)))
-
-    # genetic effect (calculating just for causal variants as rest are 0
+    # genetic effect
     for i in range (0,num_causal_snp) :
         gtype_matrix[i,:] *= snp_effects[i]
 
@@ -60,7 +54,7 @@ def gen_eff_sim (gtype_matrix, variance_gen, num_snp, num_indiv) :
     
 
 
-def enviro_eff_sim (indiv_pop_admixture, variance_enviro, num_indiv, num_pop) :
+def enviro_eff (indiv_pop_admixture, variance_enviro, num_indiv, num_pop) :
     """Simulates environmental effect on each individual's quantitative traits and disease susceptibility.
 
         Parameters
@@ -82,23 +76,22 @@ def enviro_eff_sim (indiv_pop_admixture, variance_enviro, num_indiv, num_pop) :
 
         See Also
         --------
-        gen_eff_sim
-        noise_eff_sim
+        gen_eff
+        noise_eff
     """
 
     variance_enviro /= 100.0
 
     # k-means clustering of the columns of the population admixture matrix
-    # s.t. each individual falls in one of 'd' clusters
-    # combine the 2 lines or make individual? which is better for readability?
+    # indiv_pop_admixture.T each individual falls in one of 'num_pop' clusters
     theclustering = KMeans(n_clusters=num_pop).fit(indiv_pop_admixture.T)
     # print(theclustering.labels_)
     enviro_eff = theclustering.labels_ + 1
     
 
-    # rescale lambda_k (environmental effects)
-    mc_lambda_k = np.square((enviro_eff - np.mean(enviro_eff)))
-    fact = math.sqrt(variance_enviro)/math.sqrt(np.sum(mc_lambda_k)/(num_indiv-1))
+    # rescale enviro_eff
+    mc_enviro_eff = np.square((enviro_eff - np.mean(enviro_eff)))
+    fact = math.sqrt(variance_enviro)/math.sqrt(np.sum(mc_enviro_eff)/(num_indiv-1))
     # element-wise rescaling of the environmental effects
     enviro_eff *= fact
 
@@ -107,7 +100,7 @@ def enviro_eff_sim (indiv_pop_admixture, variance_enviro, num_indiv, num_pop) :
     return enviro_eff
 
 
-def noise_eff_sim (indiv_pop_admixture, variance_noise, num_indiv, num_pop) :
+def noise_eff (indiv_pop_admixture, variance_noise, num_indiv, num_pop) :
     """Simulates noise effect on each individual's quantitative traits and disease susceptibility.
 
         Parameters
@@ -129,8 +122,8 @@ def noise_eff_sim (indiv_pop_admixture, variance_noise, num_indiv, num_pop) :
 
         See Also
         --------
-        gen_eff_sim
-        enviro_eff_sim
+        gen_eff
+        enviro_eff
     """
 
     variance_noise /= 100.0
@@ -150,15 +143,15 @@ def noise_eff_sim (indiv_pop_admixture, variance_noise, num_indiv, num_pop) :
         noise_eff[i] = np.random.normal(0,gamvec[theclustering.labels_[i]-1])
 
     # partly replaceable with np.std?
-    mc_noise = np.square((noise_eff - np.mean(noise_eff)))
-    fact = math.sqrt(variance_noise)/math.sqrt(np.sum(mc_noise)/(num_indiv-1))
+    mc_noise_eff = np.square((noise_eff - np.mean(noise_eff)))
+    fact = math.sqrt(variance_noise)/math.sqrt(np.sum(mc_noise_eff)/(num_indiv-1))
     # element-wise rescaling of the noise effects
     noise_eff *= fact
 
     return noise_eff
 
 
-def all_effs_sim(gtype_matrix,indiv_pop_admixture,all_variances,num_snp,num_indiv,num_pop) :
+def combined_effs (gtype_matrix, indiv_pop_admixture, all_variances, num_indiv, num_pop, num_causal_snp=10) :
     """Simulates quantitative traits and disease susceptibility for each individual.
 
         Parameters
@@ -174,6 +167,8 @@ def all_effs_sim(gtype_matrix,indiv_pop_admixture,all_variances,num_snp,num_indi
             Number of individuals.
         num_pop : int
             Number of population(s).
+        num_causal_snp : int, default 10
+            Number of causal SNPs. Default is 10.
 
         Returns
         -------
@@ -184,16 +179,18 @@ def all_effs_sim(gtype_matrix,indiv_pop_admixture,all_variances,num_snp,num_indi
 
         See Also
         --------
-        gen_eff_sim
-        enviro_eff_sim
-        noise_eff_sim
+        gen_eff
+        enviro_eff
+        noise_eff
     """
 
-    gen_eff = gen_eff_sim(gtype_matrix, all_variances[0], num_snp, num_indiv)
+    # should probably raise an exception/do try: except: for the variance not summing to 100 (also is it a float or int?)
 
-    enviro_eff = enviro_eff_sim(indiv_pop_admixture, all_variances[1], num_indiv, num_pop)
+    gen_eff = gen_eff (gtype_matrix, all_variances[0], num_causal_snp, num_indiv)
 
-    noise_eff = noise_eff_sim (indiv_pop_admixture, all_variances[2], num_indiv, num_pop)
+    enviro_eff = enviro_eff (indiv_pop_admixture, all_variances[1], num_indiv, num_pop)
+
+    noise_eff = noise_eff (indiv_pop_admixture, all_variances[2], num_indiv, num_pop)
 
     # Get the simulated quantitative trait for each individual
     # apostrophe --> transpose
@@ -203,10 +200,10 @@ def all_effs_sim(gtype_matrix,indiv_pop_admixture,all_variances,num_snp,num_indi
     # Binary traits
     bin_trait = traits-noise_eff
     # probability that the individual has case status (vs control)
-    prob_case = np.power(10,bin_trait)/(1+np.power(10,bin_trait))
+    prob_case_status = np.power(10,bin_trait)/(1+np.power(10,bin_trait))
     # print(np.where(prob_case>0.5)[0])
     status = np.zeros((num_indiv,1))
-    status[np.where(prob_case > 0.5)[0]] = 1
+    status[np.where(prob_case_status > 0.5)[0]] = 1
 
     return traits, status
 
