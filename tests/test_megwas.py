@@ -1,6 +1,18 @@
 from unittest import TestCase
-from SimRA.statistical_genetics import _megwas
+import pandas as pd
 
-def test_is_equal():
-    assert (_megwas.is_equal(2,2))
-    assert (not _megwas.is_equal(2,1))
+from SimRA.statistical_genetics import _genotypes
+
+
+HM_inf = pd.read_csv("tests/CEUASWMEX_fst_frq.txt",sep=u' ')
+
+class TestModelBn(TestCase):
+
+    def test_model_bn(self):
+        result_pop_matrix, result_pop_idx, result_genetic_matrix =  _genotypes.model_bn(3, 100000, 1000, HM_inf[u'FRQ'].values, HM_inf[u'FST'].values, 3) # Uses default values for populations
+        #self.assertEqual(result_pop_matrix, ) # Placeholder for real test implementation - need to input expected value
+        #self.assertEqual(result_pop_idx, ) # Placeholder for real test implementation - need to input expected value
+        #self.assertEqual(result_genetic_matrix,  ) # Placeholder for real test implementation - need to input expected value
+        print(result_pop_matrix)
+        print(result_pop_idx)
+        print(result_genetic_matrix)
