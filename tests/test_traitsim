@@ -1,0 +1,35 @@
+import unittest
+from statistical_genetics import _traits
+
+
+class TestTraitSim(unittest.TestCase) :
+
+    def setUp(self):
+        # self.gtype_matrix =  # need to input parameter value
+        # self.indiv_pop_admixture =  # need to input parameter value
+        # self.all_variances =  # need to input parameter value
+        # self.num_indiv =  # need to input parameter value
+        # self.num_pop =  # need to input parameter value
+        # self.num_causal_snp =  # need to input parameter value
+        name = self.shortDescription()
+        print ('start of test',name)
+
+    def tearDown(self):
+        name = self.shortDescription()
+        print ('end of test',name)
+  
+    def test_gen_eff(self) : 
+        result_gen_eff = _traits.gen_eff (self.gtype_matrix, self.all_variances[0], self.num_indiv, self.num_causal_snp)
+        #self.assertEqual() # Need to input expected return value 
+
+    def test_enviro_eff(self) :
+        result_enviro_eff = _traits.enviro_eff (self.indiv_pop_admixture, self.all_variances[0], self.num_indiv, self.num_pop)
+        #self.assertEqual() # Need to input expected return value 
+
+    def test_noise_eff(self) :
+        result_noise_eff = _traits.noise_eff (self.indiv_pop_admixture, self.all_variances[0], self.num_indiv, self.num_pop)
+        #self.assertEqual() # Need to input expected return value 
+
+
+if __name__ == '__main__':
+    unittest.main()
