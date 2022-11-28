@@ -24,7 +24,7 @@ def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None):
         -------
         pop_matrix : 2d data array
             Individual population adimixture matrix.
-        pop_idx : array
+        popidx : array
             Population adimixture matrix.
         genetic_matrix : 2d data array
             Genetic data matrix. 
@@ -84,23 +84,23 @@ def model_bn (n_pop, n_snp, n_indiv, frq, fst, seed: None):
     # %Song et al. Nat. Genet. (2015)
     # % Treating the probabilities as ranges
     # % 1: <60/210, 2: bet. 60/210 and 120/210, 3: >=120/210
-    pop_idx = np.zeros((n_indiv,1))
+    popidx = np.zeros((n_indiv,1))
     
     for i in range(0,n_indiv):
         p = random.uniform(0, 1)
         if p < (60.0/210):
             pick = 1
-            pop_idx[i]= 1
+            popidx[i]= 1
         elif p < (2*(60.0/210)):
             pick = 2
-            pop_idx[i] = 2
+            popidx[i] = 2
         else:
             pick = 3
-            pop_idx[i] = 3
+            popidx[i] = 3
             
         pop_matrix[pick-1,i] = 1
         # Leaving all other values at zero (indiv only assigned to one subpop)
-    return (pop_matrix, pop_idx, genetic_matrix)
+    return (pop_matrix, popidx, genetic_matrix)
 
 def model_psd(n_pop, n_snp, n_indiv, frq, fst, seed: None):
     '''Simulate model psd.
@@ -123,7 +123,7 @@ def model_psd(n_pop, n_snp, n_indiv, frq, fst, seed: None):
         -------
         pop_matrix : 2d data array
             Individual population adimixture matrix.
-        pop_idx : array
+        popidx : array
             Population adimixture matrix.
         genetic_matrix : 2d data array
             Genetic data matrix.
@@ -192,7 +192,7 @@ def model_psd(n_pop, n_snp, n_indiv, frq, fst, seed: None):
 
     return (pop_matrix, popidx, genetic_matrix)
 
-def model_HGDP(flag, n_pop, n_snp, n_indiv, topPCs, HGDP_subpops, seed: None):
+def model_hgdp(flag, n_pop, n_snp, n_indiv, topPCs, HGDP_subpops, seed: None):
     '''Simulate model HGDP
         Parameters
         ----------
@@ -216,7 +216,7 @@ def model_HGDP(flag, n_pop, n_snp, n_indiv, topPCs, HGDP_subpops, seed: None):
         -------
         pop_matrix : 2d data array
             Individual population adimixture matrix.
-        pop_idx : array
+        popidx : array
             Population adimixture matrix.
         genetic_matrix : 2d data array
             Genetic data matrix.
@@ -286,7 +286,7 @@ def model_HGDP(flag, n_pop, n_snp, n_indiv, topPCs, HGDP_subpops, seed: None):
 
     return (pop_matrix, popidx, genetic_matrix)
 
-def model_TGP(flag, n_pop, n_snp, n_indiv, topPCs, TGP_subpops, __, seed: None):
+def model_tgp(flag, n_pop, n_snp, n_indiv, topPCs, TGP_subpops, seed: None):
     '''Simulate model tgp.
         Parameters
         ----------
@@ -309,7 +309,7 @@ def model_TGP(flag, n_pop, n_snp, n_indiv, topPCs, TGP_subpops, __, seed: None):
         -------
         pop_matrix : 2d data array
             Individual population adimixture matrix.
-        pop_idx : array
+        popidx : array
             Population adimixture matrix.
         genetic_matrix : 2d data array
             Genetic data matrix.
